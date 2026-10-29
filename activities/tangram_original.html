@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#f1f6fd">
+<title>탱그램 모양 놀이터 · 전자칠판</title>
+<style>
+:root{--ink:#18314d;--muted:#63798f;--sky:#2563eb;--line:#d9e3f0;--round:19px}
+*{box-sizing:border-box}
+html,body{height:100%;width:100%;margin:0;overflow:hidden}
+body{font-family:"Pretendard","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;color:var(--ink);background:#eef4fb;-webkit-tap-highlight-color:transparent}
+button,select{font:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,select:focus-visible{outline:4px solid #f5bc39;outline-offset:2px}
+#app{height:100dvh;display:flex;flex-direction:column;gap:0;min-height:440px}
+header{min-height:72px;padding:10px 25px 9px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:white;border-bottom:1px solid #e5edf7}
+.heading{display:flex;gap:15px;align-items:center;min-width:240px}.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;background:#dbeafe;color:#2354c4;font-size:28px;font-weight:900}.heading h1{font-size:26px;line-height:1.15;margin:0;letter-spacing:-.9px}.heading small{display:block;font-size:14px;color:var(--muted);margin-top:3px;letter-spacing:-.2px}.top-actions{display:flex;gap:9px}
+button{border:1.5px solid var(--line);border-radius:13px;background:white;color:var(--ink);padding:11px 15px;white-space:nowrap;font-weight:760;font-size:16px;transition:background .12s,transform .12s}
+button:active{transform:scale(.97)}button:hover{background:#f0f6ff}button:disabled{opacity:.45;cursor:not-allowed}.primary{border-color:var(--sky);background:var(--sky);color:white}.primary:hover{background:#1749c0}.soft{background:#f3f7fc}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 24px;background:#fbfdff;border-bottom:1px solid #dde8f5;flex-wrap:wrap;min-height:76px}
+.group{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}.group>label{font-weight:800;color:#4d627b;margin-right:7px;font-size:14px}.segment{display:flex;background:#e9f0fa;padding:4px;border-radius:14px;gap:3px}.segment button{border:0;background:transparent;padding:10px 14px;border-radius:11px}.segment button.active{background:#fff;box-shadow:0 2px 7px #315a8a23;color:#1346a3}
+select{height:47px;padding:0 30px 0 13px;border:1.5px solid var(--line);border-radius:12px;background:white;color:var(--ink);font-size:15px;font-weight:800;max-width:240px}
+.wide{min-width:84px}.rotate button{font-size:23px;min-width:54px;padding:6px 12px;line-height:1.3}.toggle{display:flex;gap:6px;align-items:center;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}.toggle input{width:22px;height:22px;accent-color:#2b6bd3;cursor:pointer}
+.board-wrap{flex:1;position:relative;min-height:0;padding:10px 12px 6px}svg{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none;background:#f4f7fc;border-radius:22px;box-shadow:inset 0 1px 6px #849db724;cursor:default}
+svg [data-tray],svg [data-piece],svg [data-target]{cursor:pointer;touch-action:none}
+svg text{pointer-events:none;font-family:"Malgun Gothic",system-ui,sans-serif}
+footer{height:74px;min-height:74px;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:11px 23px 12px;gap:14px;border-top:1px solid #dae5f2}.status{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:800;min-width:0}.status-icon{height:42px;width:42px;border-radius:14px;background:#e6f1ff;display:grid;place-items:center;font-size:25px}.status-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.counter{color:#496eaa;font-size:16px;font-weight:900}.nav{display:flex;align-items:center;gap:10px}.nav button{min-width:118px}
+#success{display:none;position:absolute;top:46%;left:36%;transform:translate(-50%,-50%);pointer-events:auto;text-align:center;background:#ffffffed;border:3px solid #a8cae7;box-shadow:0 20px 65px #18314d2c;padding:24px 38px;border-radius:29px;min-width:350px;z-index:3}
+#success h2{font-size:38px;margin:3px 0 5px;color:#1472ab}#success p{font-size:18px;color:#536b80;margin:0 0 16px;font-weight:700}.stars{font-size:31px;letter-spacing:10px;color:#f0a823}
+#help{border:0;border-radius:20px;padding:24px 27px;max-width:590px;background:#fff;color:var(--ink);box-shadow:0 18px 60px #0004}#help::backdrop{background:#0a1b33a8}#help h2{margin:0 0 14px;font-size:27px}#help p{line-height:1.7;font-size:18px;margin:8px 0}#help button{margin-top:13px}
+.tiny-tip{font-size:13px;color:#63798f;margin-left:3px;font-weight:700}
+@media(max-width:1240px){.toolbar{gap:9px;padding:8px 10px}.heading h1{font-size:23px}.segment button{padding:9px 10px}.toolbar button{font-size:14px}header{padding:8px 16px}.group>label{display:none}}
+@media(max-height:710px){header{min-height:60px}.toolbar{min-height:63px;padding-top:6px;padding-bottom:6px}footer{height:61px;min-height:61px}.heading h1{font-size:21px}.heading small{font-size:12px}button{padding:8px 11px}.logo{width:39px;height:39px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="heading"><div class="logo">◩</div><div><h1>탱그램 모양 놀이터</h1><small>조각을 만지고, 돌리고, 모양에 올려 보아요</small></div></div>
+  <div class="top-actions"><button id="helpBtn" aria-label="사용 방법">❔ 사용 방법</button><button id="fullscreenBtn">⛶ 전체 화면</button></div>
+</header>
+<div class="toolbar">
+  <div class="group"><div class="segment" id="deckTabs"><button data-deck="easy" class="active">기초 · 25개</button><button data-deck="new">새로운 모양 · 20개</button></div><select id="levelSelect" aria-label="모양 선택"></select></div>
+  <div class="group"><label>힌트</label><div class="segment" id="hintTabs"><button data-hint="color" class="active">색깔</button><button data-hint="lines">조각 선</button><button data-hint="shadow">겉모양</button></div></div>
+  <div class="group rotate"><label>방향</label><button id="rotateL" title="선택한 조각 왼쪽 45도">↶</button><button id="rotateR" title="선택한 조각 오른쪽 45도">↷</button><label class="toggle"><input id="auto" type="checkbox" checked>놓으면 방향 맞춤</label><button id="resetBtn" class="soft">↺ 다시하기</button></div>
+</div>
+<div class="board-wrap">
+ <svg id="game" viewBox="0 0 1200 740" preserveAspectRatio="xMidYMid meet" role="img" aria-label="터치로 탱그램 조각을 맞추는 활동판"></svg>
+ <div id="success" role="status" aria-live="polite"><div class="stars">★ ★ ★</div><h2>완성했어요!</h2><p>멋지게 모양을 만들었어요.</p><button class="primary" id="successNext">다음 모양 →</button></div>
+</div>
+<footer>
+ <div class="status"><span class="status-icon" id="statusIcon">✋</span><div class="status-text" id="status">오른쪽 조각을 터치해 보세요.</div><span class="counter" id="progress">0 / 1</span></div>
+ <div class="nav"><button id="prevBtn">← 이전 모양</button><button class="primary" id="nextBtn">다음 모양 →</button></div>
+</footer>
+</div>
+<dialog id="help">
+  <h2>전자칠판 사용 방법</h2>
+  <p>① 오른쪽 <strong>조각 바구니</strong>에서 조각을 손으로 터치합니다.</p>
+  <p>② 왼쪽의 같은 모양 위로 <strong>끌어다 놓아요.</strong> 조각을 터치한 다음 빈 모양을 터치해도 됩니다.</p>
+  <p>③ <strong>↶ ↷</strong> 버튼으로 선택한 조각을 돌릴 수 있습니다. 어려우면 「놓으면 방향 맞춤」을 켜 두세요.</p>
+  <p>④ 「색깔 → 조각 선 → 겉모양」 순서로 힌트를 줄여 갈 수 있어요. 오른쪽 조각은 언제든 다시 움직일 수 있습니다.</p>
+  <p>평행사변형은 뒤집기 버튼 없이 회전하여 맞춥니다. 인터넷 연결 없이 작동합니다.</p>
+  <button class="primary" id="helpClose">시작하기</button>
+</dialog>
+<script>
+'use strict';
+const DATA={"bases":{"large":[[47.244,-141.732],[47.244,141.732],[-94.488,0.0]],"medium":[[-47.244,-47.244],[-47.244,94.488],[94.488,-47.244]],"square":[[-0.0,70.866],[70.866,0.0],[-0.0,-70.866],[-70.866,0.0]],"para":[[-35.433,35.433],[-35.433,-106.299],[35.433,-35.433],[35.433,106.299]],"small":[[-70.866,-23.622],[70.866,-23.622],[-0.0,47.244]],"new:para":[[35.433,-35.433],[-106.299,-35.433],[-35.433,35.433],[106.299,35.433]]},"levels":[{"deck":"easy","n":1,"name":"빨간 큰 세모","pieces":[{"type":"large","x":321.26,"y":423.78,"a":0,"color":"#f8bcb7"}],"bounds":[226.77,282.05,368.5,565.51],"silhouette":"M368.5,282.0 L368.5,565.5 L226.8,423.8 L368.5,282.0Z"},{"deck":"easy","n":2,"name":"주황 큰 세모","pieces":[{"type":"large","x":274.02,"y":423.78,"a":180,"color":"#f9d6ac"}],"bounds":[226.77,282.05,368.5,565.51],"silhouette":"M226.8,565.5 L226.8,282.0 L368.5,423.8 L226.8,565.5Z"},{"deck":"easy","n":3,"name":"파란 중간 세모","pieces":[{"type":"medium","x":274.02,"y":400.16,"a":0,"color":"#acd2ee"}],"bounds":[226.77,352.91,368.5,494.65],"silhouette":"M226.8,352.9 L226.8,494.6 L368.5,352.9 L226.8,352.9Z"},{"deck":"easy","n":4,"name":"초록 네모","pieces":[{"type":"square","x":297.64,"y":423.78,"a":0,"color":"#bee6d1"}],"bounds":[226.77,352.91,368.5,494.65],"silhouette":"M297.6,494.6 L368.5,423.8 L297.6,352.9 L226.8,423.8 L297.6,494.6Z"},{"deck":"easy","n":5,"name":"보라 평행사변형","pieces":[{"type":"para","x":297.64,"y":423.78,"a":0,"color":"#dac9ee"}],"bounds":[262.2,317.48,333.07,530.08],"silhouette":"M262.2,459.2 L262.2,317.5 L333.1,388.3 L333.1,530.1 L262.2,459.2Z"},{"deck":"easy","n":6,"name":"노란 작은 세모","pieces":[{"type":"small","x":297.64,"y":411.97,"a":0,"color":"#ffebbc"}],"bounds":[226.77,388.35,368.5,459.21],"silhouette":"M226.8,388.3 L368.5,388.3 L297.6,459.2 L226.8,388.3Z"},{"deck":"easy","n":7,"name":"분홍 작은 세모","pieces":[{"type":"small","x":297.64,"y":435.59,"a":180,"color":"#f7ccdf"}],"bounds":[226.77,388.35,368.5,459.21],"silhouette":"M368.5,459.2 L297.6,388.3 L226.8,459.2 L368.5,459.2Z"},{"deck":"easy","n":8,"name":"집","pieces":[{"type":"medium","x":297.64,"y":390.37,"a":45,"color":"#acd2ee"},{"type":"square","x":297.64,"y":473.89,"a":315,"color":"#bee6d1"}],"bounds":[197.42,323.56,397.86,524.0],"silhouette":"M247.5,423.8 L247.5,524.0 L347.7,524.0 L347.7,423.8 L397.9,423.8 L297.6,323.6 L197.4,423.8 L247.5,423.8Z"},{"deck":"easy","n":9,"name":"물고기","pieces":[{"type":"square","x":247.53,"y":423.78,"a":270,"color":"#bee6d1"},{"type":"medium","x":385.21,"y":423.78,"a":315,"color":"#acd2ee"}],"bounds":[176.66,323.56,418.61,524.0],"silhouette":"M247.5,494.6 L318.4,423.8 L247.5,352.9 L176.7,423.8 L247.5,494.6ZM418.6,524.0 L418.6,323.6 L318.4,423.8 L418.6,524.0Z"},{"deck":"easy","n":10,"name":"배","pieces":[{"type":"para","x":294.09,"y":494.65,"a":90,"color":"#dac9ee"},{"type":"medium","x":312.99,"y":411.97,"a":270,"color":"#acd2ee"}],"bounds":[187.8,317.48,407.48,530.08],"silhouette":"M407.5,459.2 L265.7,317.5 L265.7,459.2 L258.7,459.2 L187.8,530.1 L329.5,530.1 L400.4,459.2 L407.5,459.2Z"},{"deck":"easy","n":11,"name":"큰 세모 이어 붙이기","pieces":[{"type":"large","x":392.13,"y":423.78,"a":0,"color":"#f8bcb7"},{"type":"large","x":297.64,"y":329.29,"a":270,"color":"#f9d6ac"}],"bounds":[155.91,282.05,439.37,565.51],"silhouette":"M155.9,282.0 L297.6,423.8 L439.4,565.5 L439.4,282.0 L155.9,282.0Z"},{"deck":"easy","n":12,"name":"작은 네모 만들기","pieces":[{"type":"small","x":280.93,"y":440.48,"a":45,"color":"#ffebbc"},{"type":"small","x":314.34,"y":407.08,"a":225,"color":"#f7ccdf"}],"bounds":[247.53,373.67,347.75,473.89],"silhouette":"M347.7,473.9 L347.7,373.7 L247.5,373.7 L247.5,473.9 L347.7,473.9Z"},{"deck":"easy","n":13,"name":"집","pieces":[{"type":"medium","x":297.64,"y":390.37,"a":45,"color":"#f8fafc"},{"type":"square","x":297.64,"y":473.89,"a":315,"color":"#f8fafc"}],"bounds":[197.42,323.56,397.86,524.0],"silhouette":"M247.5,423.8 L247.5,524.0 L347.7,524.0 L347.7,423.8 L397.9,423.8 L297.6,323.6 L197.4,423.8 L247.5,423.8Z"},{"deck":"easy","n":14,"name":"물고기","pieces":[{"type":"square","x":247.53,"y":423.78,"a":270,"color":"#f8fafc"},{"type":"medium","x":385.21,"y":423.78,"a":315,"color":"#f8fafc"}],"bounds":[176.66,323.56,418.61,524.0],"silhouette":"M247.5,494.6 L318.4,423.8 L247.5,352.9 L176.7,423.8 L247.5,494.6ZM418.6,524.0 L418.6,323.6 L318.4,423.8 L418.6,524.0Z"},{"deck":"easy","n":15,"name":"배","pieces":[{"type":"para","x":294.09,"y":494.65,"a":90,"color":"#f8fafc"},{"type":"medium","x":312.99,"y":411.97,"a":270,"color":"#f8fafc"}],"bounds":[187.8,317.48,407.48,530.08],"silhouette":"M407.5,459.2 L265.7,317.5 L265.7,459.2 L258.7,459.2 L187.8,530.1 L329.5,530.1 L400.4,459.2 L407.5,459.2Z"},{"deck":"easy","n":16,"name":"큰 세모 이어 붙이기","pieces":[{"type":"large","x":392.13,"y":423.78,"a":0,"color":"#f8fafc"},{"type":"large","x":297.64,"y":329.29,"a":270,"color":"#f8fafc"}],"bounds":[155.91,282.05,439.37,565.51],"silhouette":"M155.9,282.0 L297.6,423.8 L439.4,565.5 L439.4,282.0 L155.9,282.0Z"},{"deck":"easy","n":17,"name":"작은 네모 만들기","pieces":[{"type":"small","x":280.93,"y":440.48,"a":45,"color":"#f8fafc"},{"type":"small","x":314.34,"y":407.08,"a":225,"color":"#f8fafc"}],"bounds":[247.53,373.67,347.75,473.89],"silhouette":"M347.7,473.9 L347.7,373.7 L247.5,373.7 L247.5,473.9 L347.7,473.9Z"},{"deck":"easy","n":18,"name":"세 조각 모양 1","pieces":[{"type":"large","x":356.69,"y":423.78,"a":0,"color":"#f8bcb7"},{"type":"square","x":262.2,"y":494.65,"a":90,"color":"#bee6d1"},{"type":"small","x":333.07,"y":541.89,"a":180,"color":"#ffebbc"}],"bounds":[191.34,282.05,403.94,565.51],"silhouette":"M403.9,282.0 L262.2,423.8 L191.3,494.6 L262.2,565.5 L403.9,565.5 L403.9,282.0Z"},{"deck":"easy","n":19,"name":"세 조각 모양 2","pieces":[{"type":"medium","x":356.69,"y":482.83,"a":180,"color":"#acd2ee"},{"type":"square","x":333.07,"y":388.35,"a":270,"color":"#bee6d1"},{"type":"small","x":262.2,"y":435.59,"a":180,"color":"#f7ccdf"}],"bounds":[191.34,317.48,403.94,530.08],"silhouette":"M333.1,317.5 L262.2,388.3 L191.3,459.2 L333.1,459.2 L262.2,530.1 L403.9,530.1 L403.9,388.3 L333.1,317.5Z"},{"deck":"easy","n":20,"name":"세 조각 모양 3","pieces":[{"type":"large","x":356.69,"y":423.78,"a":0,"color":"#f9d6ac"},{"type":"para","x":297.64,"y":317.48,"a":90,"color":"#dac9ee"},{"type":"small","x":262.2,"y":376.54,"a":0,"color":"#f7ccdf"}],"bounds":[191.34,282.05,403.94,565.51],"silhouette":"M262.2,282.0 L191.3,352.9 L262.2,423.8 L333.1,352.9 L403.9,282.0 L262.2,282.0ZM403.9,282.0 L262.2,423.8 L403.9,565.5 L403.9,282.0Z"},{"deck":"easy","n":21,"name":"세 조각 모양 4","pieces":[{"type":"medium","x":321.26,"y":329.29,"a":90,"color":"#acd2ee"},{"type":"para","x":333.07,"y":459.21,"a":0,"color":"#dac9ee"},{"type":"small","x":274.02,"y":423.78,"a":90,"color":"#f7ccdf"}],"bounds":[226.77,282.05,368.5,565.51],"silhouette":"M226.8,282.0 L297.6,352.9 L226.8,423.8 L297.6,494.6 L368.5,565.5 L368.5,423.8 L368.5,282.0 L226.8,282.0Z"},{"deck":"easy","n":22,"name":"세 조각 모양 1","pieces":[{"type":"large","x":356.69,"y":423.78,"a":0,"color":"#f8fafc"},{"type":"square","x":262.2,"y":494.65,"a":90,"color":"#f8fafc"},{"type":"small","x":333.07,"y":541.89,"a":180,"color":"#f8fafc"}],"bounds":[191.34,282.05,403.94,565.51],"silhouette":"M403.9,282.0 L262.2,423.8 L191.3,494.6 L262.2,565.5 L403.9,565.5 L403.9,282.0Z"},{"deck":"easy","n":23,"name":"세 조각 모양 2","pieces":[{"type":"medium","x":356.69,"y":482.83,"a":180,"color":"#f8fafc"},{"type":"square","x":333.07,"y":388.35,"a":270,"color":"#f8fafc"},{"type":"small","x":262.2,"y":435.59,"a":180,"color":"#f8fafc"}],"bounds":[191.34,317.48,403.94,530.08],"silhouette":"M333.1,317.5 L262.2,388.3 L191.3,459.2 L333.1,459.2 L262.2,530.1 L403.9,530.1 L403.9,388.3 L333.1,317.5Z"},{"deck":"easy","n":24,"name":"세 조각 모양 3","pieces":[{"type":"large","x":356.69,"y":423.78,"a":0,"color":"#f8fafc"},{"type":"para","x":297.64,"y":317.48,"a":90,"color":"#f8fafc"},{"type":"small","x":262.2,"y":376.54,"a":0,"color":"#f8fafc"}],"bounds":[191.34,282.05,403.94,565.51],"silhouette":"M262.2,282.0 L191.3,352.9 L262.2,423.8 L333.1,352.9 L403.9,282.0 L262.2,282.0ZM403.9,282.0 L262.2,423.8 L403.9,565.5 L403.9,282.0Z"},{"deck":"easy","n":25,"name":"세 조각 모양 4","pieces":[{"type":"medium","x":321.26,"y":329.29,"a":90,"color":"#f8fafc"},{"type":"para","x":333.07,"y":459.21,"a":0,"color":"#f8fafc"},{"type":"small","x":274.02,"y":423.78,"a":90,"color":"#f8fafc"}],"bounds":[226.77,282.05,368.5,565.51],"silhouette":"M226.8,282.0 L297.6,352.9 L226.8,423.8 L297.6,494.6 L368.5,565.5 L368.5,423.8 L368.5,282.0 L226.8,282.0Z"},{"deck":"new","n":1,"name":"새로운 모양 01","pieces":[{"type":"large","x":297.64,"y":511.18,"a":90,"color":"#f19a95"},{"type":"small","x":415.75,"y":487.56,"a":90,"color":"#f6d369"},{"type":"small","x":250.39,"y":416.69,"a":270,"color":"#f5a4c3"}],"bounds":[155.91,345.83,439.37,558.43],"silhouette":"M226.8,487.6 L155.9,558.4 L439.4,558.4 L439.4,416.7 L368.5,487.6 L297.6,416.7 L226.8,345.8 L226.8,487.6Z"},{"deck":"new","n":2,"name":"새로운 모양 02","pieces":[{"type":"large","x":297.64,"y":404.88,"a":90,"color":"#f19a95"},{"type":"small","x":368.5,"y":334.02,"a":0,"color":"#f6d369"},{"type":"large","x":297.64,"y":499.37,"a":270,"color":"#fac17a"}],"bounds":[155.91,310.39,439.37,593.86],"silhouette":"M297.6,310.4 L155.9,452.1 L297.6,593.9 L439.4,452.1 L368.5,381.3 L439.4,310.4 L297.6,310.4Z"},{"deck":"new","n":3,"name":"새로운 모양 03","pieces":[{"type":"large","x":262.2,"y":475.75,"a":90,"color":"#f19a95"},{"type":"medium","x":356.69,"y":428.5,"a":90,"color":"#73b2f0"},{"type":"small","x":427.56,"y":452.13,"a":270,"color":"#f6d369"}],"bounds":[120.47,381.26,474.8,522.99],"silhouette":"M403.9,523.0 L474.8,452.1 L403.9,381.3 L262.2,381.3 L120.5,523.0 L403.9,523.0Z"},{"deck":"new","n":4,"name":"새로운 모양 04","pieces":[{"type":"large","x":297.64,"y":511.18,"a":90,"color":"#f19a95"},{"type":"medium","x":392.13,"y":463.94,"a":90,"color":"#73b2f0"},{"type":"para","x":262.2,"y":593.86,"a":0,"color":"#bd99ef"},{"type":"large","x":297.64,"y":369.45,"a":90,"color":"#fac17a"}],"bounds":[155.91,274.96,439.37,629.29],"silhouette":"M297.6,275.0 L155.9,416.7 L297.6,416.7 L155.9,558.4 L226.8,629.3 L368.5,629.3 L297.6,558.4 L439.4,558.4 L439.4,416.7 L297.6,275.0Z"},{"deck":"new","n":5,"name":"새로운 모양 05","pieces":[{"type":"large","x":333.07,"y":369.45,"a":90,"color":"#f19a95"},{"type":"medium","x":427.56,"y":322.2,"a":90,"color":"#73b2f0"},{"type":"small","x":191.34,"y":369.45,"a":0,"color":"#f6d369"},{"type":"large","x":167.72,"y":487.56,"a":180,"color":"#fac17a"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M474.8,275.0 L333.1,275.0 L191.3,416.7 L474.8,416.7 L474.8,275.0ZM191.3,416.7 L262.2,345.8 L120.5,345.8 L191.3,416.7ZM262.2,487.6 L120.5,345.8 L120.5,629.3 L262.2,487.6Z"},{"deck":"new","n":6,"name":"새로운 모양 06","pieces":[{"type":"large","x":262.2,"y":440.31,"a":90,"color":"#f19a95"},{"type":"medium","x":167.72,"y":393.07,"a":0,"color":"#73b2f0"},{"type":"small","x":403.94,"y":440.31,"a":0,"color":"#f6d369"},{"type":"para","x":368.5,"y":522.99,"a":0,"color":"#bd99ef"}],"bounds":[120.47,345.83,474.8,558.43],"silhouette":"M262.2,487.6 L333.1,558.4 L474.8,558.4 L403.9,487.6 L262.2,345.8 L120.5,345.8 L120.5,487.6 L262.2,487.6ZM403.9,487.6 L474.8,416.7 L333.1,416.7 L403.9,487.6Z"},{"deck":"new","n":7,"name":"새로운 모양 07","pieces":[{"type":"large","x":262.2,"y":404.88,"a":90,"color":"#f19a95"},{"type":"large","x":262.2,"y":499.37,"a":270,"color":"#fac17a"},{"type":"para","x":368.5,"y":345.83,"a":0,"color":"#bd99ef"},{"type":"small","x":380.31,"y":522.99,"a":90,"color":"#f6d369"}],"bounds":[120.47,310.39,474.8,593.86],"silhouette":"M120.5,452.1 L262.2,593.9 L403.9,452.1 L333.1,381.3 L474.8,381.3 L403.9,310.4 L262.2,310.4 L120.5,452.1ZM333.1,523.0 L403.9,593.9 L403.9,452.1 L333.1,523.0Z"},{"deck":"new","n":8,"name":"새로운 모양 08","pieces":[{"type":"large","x":347.75,"y":546.61,"a":90,"color":"#f19a95"},{"type":"large","x":253.26,"y":452.13,"a":180,"color":"#fac17a"},{"type":"square","x":155.91,"y":543.75,"a":225,"color":"#80d9ac"},{"type":"small","x":182.39,"y":422.77,"a":90,"color":"#f6d369"}],"bounds":[105.8,310.39,489.48,593.86],"silhouette":"M206.0,493.6 L105.8,493.6 L105.8,593.9 L206.0,593.9 L489.5,593.9 L347.7,452.1 L206.0,310.4 L206.0,351.9 L135.1,422.8 L206.0,493.6Z"},{"deck":"new","n":9,"name":"새로운 모양 09","pieces":[{"type":"large","x":262.2,"y":404.88,"a":90,"color":"#f19a95"},{"type":"small","x":191.34,"y":334.02,"a":0,"color":"#f6d369"},{"type":"para","x":368.5,"y":487.56,"a":0,"color":"#bd99ef"},{"type":"medium","x":214.96,"y":499.37,"a":90,"color":"#73b2f0"},{"type":"small","x":403.94,"y":546.61,"a":0,"color":"#f5a4c3"}],"bounds":[120.47,310.39,474.8,593.86],"silhouette":"M191.3,381.3 L120.5,452.1 L262.2,593.9 L262.2,452.1 L333.1,523.0 L403.9,593.9 L474.8,523.0 L403.9,452.1 L262.2,310.4 L120.5,310.4 L191.3,381.3Z"},{"deck":"new","n":10,"name":"새로운 모양 10","pieces":[{"type":"large","x":297.64,"y":475.75,"a":90,"color":"#f19a95"},{"type":"medium","x":392.13,"y":570.24,"a":90,"color":"#73b2f0"},{"type":"large","x":392.13,"y":381.26,"a":0,"color":"#fac17a"},{"type":"square","x":297.64,"y":593.86,"a":90,"color":"#80d9ac"},{"type":"small","x":226.77,"y":546.61,"a":0,"color":"#f6d369"}],"bounds":[155.91,239.53,439.37,664.72],"silhouette":"M297.6,381.3 L155.9,523.0 L226.8,593.9 L297.6,664.7 L368.5,593.9 L297.6,523.0 L439.4,664.7 L439.4,523.0 L439.4,239.5 L297.6,381.3Z"},{"deck":"new","n":11,"name":"새로운 모양 11","pieces":[{"type":"large","x":247.53,"y":511.18,"a":90,"color":"#f19a95"},{"type":"small","x":365.64,"y":487.56,"a":90,"color":"#f6d369"},{"type":"square","x":439.37,"y":508.32,"a":135,"color":"#80d9ac"},{"type":"para","x":141.23,"y":452.13,"a":90,"color":"#bd99ef"},{"type":"small","x":318.39,"y":440.31,"a":0,"color":"#f5a4c3"}],"bounds":[105.8,345.83,489.48,558.43],"silhouette":"M105.8,416.7 L105.8,558.4 L389.3,558.4 L489.5,558.4 L489.5,458.2 L389.3,458.2 L389.3,416.7 L247.5,416.7 L176.7,487.6 L176.7,345.8 L105.8,416.7Z"},{"deck":"new","n":12,"name":"새로운 모양 12","pieces":[{"type":"large","x":247.53,"y":546.61,"a":90,"color":"#f19a95"},{"type":"para","x":353.83,"y":487.56,"a":180,"color":"#bd99ef"},{"type":"small","x":389.26,"y":546.61,"a":0,"color":"#f6d369"},{"type":"medium","x":342.02,"y":404.88,"a":180,"color":"#73b2f0"},{"type":"square","x":439.37,"y":360.5,"a":315,"color":"#80d9ac"}],"bounds":[105.8,310.39,489.48,593.86],"silhouette":"M489.5,310.4 L389.3,310.4 L247.5,452.1 L105.8,593.9 L389.3,593.9 L460.1,523.0 L389.3,452.1 L389.3,410.6 L489.5,410.6 L489.5,310.4Z"},{"deck":"new","n":13,"name":"새로운 모양 13","pieces":[{"type":"large","x":297.64,"y":546.61,"a":90,"color":"#f19a95"},{"type":"large","x":203.15,"y":452.13,"a":180,"color":"#fac17a"},{"type":"para","x":262.2,"y":345.83,"a":0,"color":"#bd99ef"},{"type":"small","x":415.75,"y":522.99,"a":90,"color":"#f6d369"},{"type":"small","x":368.5,"y":475.75,"a":0,"color":"#f5a4c3"}],"bounds":[155.91,310.39,439.37,593.86],"silhouette":"M297.6,310.4 L155.9,310.4 L226.8,381.3 L368.5,381.3 L297.6,310.4ZM155.9,310.4 L155.9,593.9 L439.4,593.9 L439.4,452.1 L297.6,452.1 L155.9,310.4Z"},{"deck":"new","n":14,"name":"새로운 모양 14","pieces":[{"type":"large","x":297.64,"y":475.75,"a":90,"color":"#f19a95"},{"type":"small","x":415.75,"y":452.13,"a":90,"color":"#f6d369"},{"type":"small","x":226.77,"y":546.61,"a":0,"color":"#f5a4c3"},{"type":"square","x":297.64,"y":593.86,"a":90,"color":"#80d9ac"},{"type":"medium","x":203.15,"y":428.5,"a":0,"color":"#73b2f0"},{"type":"large","x":297.64,"y":334.02,"a":90,"color":"#fac17a"}],"bounds":[155.91,239.53,439.37,664.72],"silhouette":"M297.6,239.5 L155.9,381.3 L155.9,523.0 L226.8,593.9 L297.6,664.7 L368.5,593.9 L297.6,523.0 L439.4,523.0 L297.6,381.3 L439.4,381.3 L297.6,239.5ZM368.5,452.1 L439.4,523.0 L439.4,381.3 L368.5,452.1Z"},{"deck":"new","n":15,"name":"새로운 모양 15","pieces":[{"type":"large","x":333.07,"y":369.45,"a":90,"color":"#f19a95"},{"type":"large","x":333.07,"y":463.94,"a":270,"color":"#fac17a"},{"type":"medium","x":427.56,"y":322.2,"a":90,"color":"#73b2f0"},{"type":"para","x":226.77,"y":522.99,"a":0,"color":"#bd99ef"},{"type":"small","x":262.2,"y":582.05,"a":0,"color":"#f6d369"},{"type":"small","x":333.07,"y":605.67,"a":180,"color":"#f5a4c3"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M333.1,558.4 L474.8,416.7 L474.8,275.0 L333.1,275.0 L191.3,416.7 L333.1,558.4ZM120.5,487.6 L191.3,558.4 L262.2,629.3 L403.9,629.3 L333.1,558.4 L262.2,487.6 L120.5,487.6Z"},{"deck":"new","n":16,"name":"새로운 모양 16","pieces":[{"type":"large","x":262.2,"y":440.31,"a":90,"color":"#f19a95"},{"type":"medium","x":356.69,"y":534.8,"a":90,"color":"#73b2f0"},{"type":"square","x":403.94,"y":416.69,"a":180,"color":"#80d9ac"},{"type":"small","x":427.56,"y":558.43,"a":270,"color":"#f6d369"},{"type":"large","x":333.07,"y":322.2,"a":270,"color":"#fac17a"},{"type":"small","x":451.18,"y":345.83,"a":90,"color":"#f5a4c3"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M333.1,416.7 L474.8,275.0 L191.3,275.0 L333.1,416.7ZM474.8,275.0 L403.9,345.8 L333.1,416.7 L403.9,487.6 L474.8,416.7 L474.8,275.0ZM120.5,487.6 L262.2,487.6 L403.9,629.3 L474.8,558.4 L403.9,487.6 L262.2,345.8 L120.5,487.6Z"},{"deck":"new","n":17,"name":"새로운 모양 17","pieces":[{"type":"large","x":333.07,"y":440.31,"a":90,"color":"#f19a95"},{"type":"para","x":297.64,"y":522.99,"a":180,"color":"#bd99ef"},{"type":"small","x":262.2,"y":369.45,"a":0,"color":"#f6d369"},{"type":"square","x":191.34,"y":558.43,"a":180,"color":"#80d9ac"},{"type":"small","x":403.94,"y":511.18,"a":0,"color":"#f5a4c3"},{"type":"large","x":167.72,"y":416.69,"a":180,"color":"#fac17a"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M262.2,416.7 L333.1,345.8 L191.3,345.8 L262.2,416.7ZM120.5,275.0 L120.5,558.4 L262.2,416.7 L120.5,275.0ZM191.3,487.6 L120.5,558.4 L191.3,629.3 L262.2,558.4 L403.9,558.4 L474.8,487.6 L333.1,345.8 L191.3,487.6Z"},{"deck":"new","n":18,"name":"새로운 모양 18","pieces":[{"type":"large","x":297.64,"y":440.31,"a":90,"color":"#f19a95"},{"type":"medium","x":203.15,"y":534.8,"a":0,"color":"#73b2f0"},{"type":"large","x":297.64,"y":582.05,"a":90,"color":"#fac17a"},{"type":"square","x":368.5,"y":345.83,"a":90,"color":"#80d9ac"},{"type":"small","x":179.53,"y":416.69,"a":270,"color":"#f6d369"},{"type":"small","x":415.75,"y":558.43,"a":90,"color":"#f5a4c3"}],"bounds":[155.91,274.96,439.37,629.29],"silhouette":"M439.4,345.8 L368.5,275.0 L297.6,345.8 L368.5,416.7 L439.4,345.8ZM155.9,345.8 L155.9,487.6 L226.8,416.7 L155.9,345.8ZM155.9,487.6 L155.9,629.3 L439.4,629.3 L297.6,487.6 L439.4,487.6 L297.6,345.8 L155.9,487.6ZM439.4,629.3 L439.4,487.6 L368.5,558.4 L439.4,629.3Z"},{"deck":"new","n":19,"name":"새로운 모양 19","pieces":[{"type":"large","x":262.2,"y":369.45,"a":90,"color":"#f19a95"},{"type":"para","x":368.5,"y":452.13,"a":0,"color":"#bd99ef"},{"type":"small","x":191.34,"y":440.31,"a":0,"color":"#f6d369"},{"type":"large","x":167.72,"y":558.43,"a":180,"color":"#fac17a"},{"type":"medium","x":167.72,"y":322.2,"a":0,"color":"#73b2f0"},{"type":"small","x":451.18,"y":416.69,"a":90,"color":"#f5a4c3"},{"type":"square","x":333.07,"y":274.96,"a":0,"color":"#80d9ac"}],"bounds":[120.47,204.09,474.8,700.16],"silhouette":"M403.9,275.0 L333.1,204.1 L262.2,275.0 L333.1,345.8 L403.9,275.0ZM262.2,275.0 L120.5,275.0 L120.5,416.7 L120.5,700.2 L262.2,558.4 L191.3,487.6 L262.2,416.7 L333.1,487.6 L474.8,487.6 L474.8,345.8 L403.9,416.7 L262.2,275.0Z"},{"deck":"new","n":20,"name":"새로운 모양 20","pieces":[{"type":"large","x":333.07,"y":440.31,"a":90,"color":"#f19a95"},{"type":"large","x":333.07,"y":534.8,"a":270,"color":"#fac17a"},{"type":"small","x":191.34,"y":534.8,"a":180,"color":"#f6d369"},{"type":"small","x":191.34,"y":582.05,"a":0,"color":"#f5a4c3"},{"type":"para","x":155.91,"y":452.13,"a":90,"color":"#bd99ef"},{"type":"medium","x":427.56,"y":582.05,"a":180,"color":"#73b2f0"},{"type":"square","x":262.2,"y":345.83,"a":90,"color":"#80d9ac"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M191.3,345.8 L262.2,416.7 L333.1,345.8 L262.2,275.0 L191.3,345.8ZM191.3,487.6 L191.3,345.8 L120.5,416.7 L120.5,558.4 L191.3,629.3 L262.2,558.4 L333.1,629.3 L474.8,629.3 L474.8,487.6 L333.1,345.8 L191.3,487.6Z"}]};
+const SVG='http://www.w3.org/2000/svg';
+const game=document.getElementById('game');
+const levelSelect=document.getElementById('levelSelect');
+const success=document.getElementById('success');
+const progress=document.getElementById('progress');
+const status=document.getElementById('status');
+const statusIcon=document.getElementById('statusIcon');
+let deck='easy',levelIndex=0,hint='color',auto=true;
+let items=[],slots=[],selected=-1,drag=null,slotScale=1,complete=false,toastText='';
+const PTYPE={large:'큰 세모',medium:'중간 세모',small:'작은 세모',square:'네모',para:'평행사변형'};
+const keepNoEvent=(s)=>String(s).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const currentLevel=()=>DATA.levels.filter(l=>l.deck===deck)[levelIndex];
+const levelsInDeck=()=>DATA.levels.filter(l=>l.deck===deck);
+const rad=a=>a*Math.PI/180;
+const dist=(x,y,a,b)=>Math.hypot(x-a,y-b);
+const angleDist=(a,b)=>Math.abs((((a-b)%360)+540)%360-180);
+const basePoints=type=>DATA.bases[(deck==='new'&&type==='para')?'new:para':type];
+const ptString=pts=>pts.map(p=>p.map(n=>n.toFixed(2)).join(',')).join(' ');
+function levelHint(){if(deck==='new')return 'lines'; if(levelIndex<12||levelIndex>=17&&levelIndex<=20)return 'color';return 'lines'}
+function screenToSVG(ev){const p=game.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(game.getScreenCTM().inverse())}
+function coords(p){const a=rad(p.a),c=Math.cos(a),s=Math.sin(a);return basePoints(p.type).map(([u,v])=>[p.x+slotScale*(u*c-v*s),p.y+slotScale*(u*s+v*c)])}
+function makeSlotData(l){const [x0,y0,x1,y1]=l.bounds;slotScale=Math.min(1.52,680/(x1-x0),560/(y1-y0));const cx=(x0+x1)/2,cy=(y0+y1)/2;slots=l.pieces.map((p,i)=>({...p,index:i,x:445+(p.x-cx)*slotScale,y:369+(p.y-cy)*slotScale,origX:p.x,origY:p.y}));return {cx,cy}}
+let sceneCenter={cx:297,cy:440};
+function setupLevel(resetHint=true){
+ const l=currentLevel();sceneCenter=makeSlotData(l);
+ items=l.pieces.map((p,i)=>({id:i,type:p.type,color:p.color,a:0,x:0,y:0,location:'tray',slot:-1}));
+ selected=-1;complete=false;drag=null;if(resetHint)hint=levelHint();
+ levelSelect.innerHTML=levelsInDeck().map((v,i)=>`<option value="${i}" ${i===levelIndex?'selected':''}>${String(i+1).padStart(2,'0')} · ${keepNoEvent(v.name)} (${v.pieces.length}조각)</option>`).join('');
+ updateControlState();setStatus('오른쪽 조각을 터치해 보세요.','✋');render();
+}
+function setStatus(t,ico='✋'){toastText=t;status.textContent=t;statusIcon.textContent=ico}
+function updateControlState(){
+ document.querySelectorAll('[data-deck]').forEach(b=>b.classList.toggle('active',b.dataset.deck===deck));
+ document.querySelectorAll('[data-hint]').forEach(b=>b.classList.toggle('active',b.dataset.hint===hint));
+ document.getElementById('rotateL').disabled=selected<0;
+ document.getElementById('rotateR').disabled=selected<0;
+ document.getElementById('prevBtn').disabled=levelIndex===0;
+ document.getElementById('nextBtn').disabled=levelIndex===levelsInDeck().length-1;
+ document.getElementById('successNext').disabled=levelIndex===levelsInDeck().length-1;
+ document.getElementById('auto').checked=auto;
+ progress.textContent=`${items.filter(p=>p.slot>=0).length} / ${items.length}`;
+ success.style.display=complete?'block':'none';
+}
+function geomTransform(p){return `translate(${p.x.toFixed(2)},${p.y.toFixed(2)}) rotate(${p.a}) scale(${slotScale.toFixed(4)})`}
+function drawTarget(p){
+ const cp=basePoints(p.type),poly=ptString(cp);
+ const hit=`<polygon data-target="${p.index}" points="${poly}" transform="${geomTransform(p)}" fill="transparent" stroke="transparent" stroke-width="8"/>`;
+ if(hint==='shadow')return hit;
+ const fill=hint==='color'?p.color:'#eff4f8';
+ const alpha=hint==='color'?'0.58':'1';
+ const stroke=hint==='color'?'#7894a9':'#728a9d';
+ const occ=items.some(it=>it.slot===p.index);
+ const visible=occ?`<polygon points="${poly}" transform="${geomTransform(p)}" fill="none" stroke="#d7e3ec" stroke-width="2" opacity=".16" pointer-events="none"/>`:
+ `<polygon points="${poly}" transform="${geomTransform(p)}" fill="${fill}" fill-opacity="${alpha}" stroke="${stroke}" stroke-width="2.6" stroke-linejoin="round" pointer-events="none"/>`;
+ return visible+hit;
+}
+function drawPiece(it){
+ const poly=ptString(basePoints(it.type));
+ const transform=geomTransform(it);
+ const sel=it.id===selected;
+ return `<g data-piece="${it.id}" transform="${transform}" style="filter:drop-shadow(0px 5px 4px #213d5533)">
+  <polygon points="${poly}" fill="${it.color}" stroke="${sel?'#1c57d9':'#39586e'}" stroke-width="${sel?5:2.4}" stroke-linejoin="round"/>
+  <polygon points="${poly}" fill="transparent" stroke="transparent" stroke-width="15"/>
+ </g>`;
+}
+function trayPiece(it,i){
+ const row=Math.floor(i/2),col=i%2,x=933+col*119,y=135+row*137,w=110,h=123;
+ const used=it.slot>=0,loose=it.location==='free',isSel=selected===i;
+ const pp=basePoints(it.type),bx=Math.max(...pp.map(p=>p[0]))-Math.min(...pp.map(p=>p[0])),by=Math.max(...pp.map(p=>p[1]))-Math.min(...pp.map(p=>p[1]));
+ const prevS=Math.min(.85,94/bx,78/by);
+ const tileFill=isSel?'#e0edff':used?'#e0f4e9':'#fff';
+ const tileStroke=isSel?'#2b63c7':used?'#a9d7b7':'#d4e1ed';
+ const annotation=used?'✓ 놓았어요':loose?'↗ 옮기는 중':PTYPE[it.type];
+ return `<g data-tray="${i}">
+ <rect x="${x}" y="${y}" rx="15" width="${w}" height="${h}" fill="${tileFill}" stroke="${tileStroke}" stroke-width="${isSel?3:1.7}"/>
+ <g transform="translate(${x+w/2},${y+54}) rotate(${it.a}) scale(${prevS.toFixed(3)})" opacity="${used?.48:1}">
+  <polygon points="${ptString(pp)}" fill="${it.color}" stroke="#38536b" stroke-width="3.5" stroke-linejoin="round"/>
+ </g>
+ <text x="${x+w/2}" y="${y+108}" text-anchor="middle" font-size="13" font-weight="850" fill="${used?'#538169':'#49617a'}">${annotation}</text>
+ </g>`;
+}
+function render(){
+ const l=currentLevel();
+ const silT=`translate(445,369) scale(${slotScale.toFixed(5)}) translate(${-sceneCenter.cx},${-sceneCenter.cy})`;
+ const stage=`<rect x="14" y="20" width="882" height="702" rx="25" fill="white" stroke="#e0eaf4" stroke-width="2"/>
+ <rect x="919" y="20" width="267" height="702" rx="25" fill="#e9f1fb" stroke="#d8e6f4" stroke-width="2"/>
+ <text x="45" y="73" font-size="26" font-weight="900" fill="#193852">${keepNoEvent(l.name)}</text>
+ <text x="45" y="104" font-size="17" font-weight="750" fill="#7690a4">${l.pieces.length}조각 · ${deck==='easy'?'기초 모양':'새로운 모양 '+String(levelIndex+1).padStart(2,'0')}</text>
+ <text x="1052" y="73" text-anchor="middle" font-size="24" font-weight="900" fill="#254467">조각 바구니</text>
+ <text x="1052" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="#677f98">골라서 끌어다 놓아요</text>
+ <text x="48" y="689" font-size="16" fill="#9bafc2" font-weight="740">${hint==='shadow'?'겉모양을 보고 맞춰요':hint==='color'?'같은 색깔과 모양을 찾아요':'같은 모양을 찾아요'}</text>`;
+ const silhouette=`<path d="${l.silhouette}" transform="${silT}" fill="#dae6ee" stroke="#708b9d" stroke-width="2.5" stroke-linejoin="round" fill-rule="evenodd" pointer-events="none"/>`;
+ const targetStr=slots.map(drawTarget).join('');
+ const piecesOnStage=items.filter(it=>it.location!=='tray').map(drawPiece).join('');
+ const tiles=items.map(trayPiece).join('');
+ game.innerHTML=stage+`<g>${silhouette}</g>`+targetStr+piecesOnStage+tiles;
+ updateControlState();
+}
+function availableSlot(item,point,maxdist=110){
+ let candidates=slots.filter(s=>s.type===item.type&&!items.some(z=>z.slot===s.index));
+ if(hint==='color')candidates=candidates.filter(s=>s.color.toLowerCase()===item.color.toLowerCase());
+ candidates=candidates.map(s=>({s,d:dist(point.x,point.y,s.x,s.y)})).sort((a,b)=>a.d-b.d);
+ return candidates.length&&candidates[0].d<maxdist?candidates[0].s:null;
+}
+function placePiece(i,slot,forceAuto=auto){
+ if(i<0||!slot)return false;
+ const it=items[i];if(it.type!==slot.type)return false;
+ if(hint==='color'&&slot.color.toLowerCase()!==it.color.toLowerCase())return false;
+ if(items.some(z=>z.slot===slot.index&&z.id!==i))return false;
+ if(!forceAuto&&angleDist(it.a,slot.a)>7){setStatus('방향이 달라요. ↶ ↷ 버튼으로 돌려 보세요.','↻');render();return false}
+ it.x=slot.x;it.y=slot.y;it.a=slot.a;it.slot=slot.index;it.location='placed';selected=-1;
+ const placed=items.filter(p=>p.slot>=0).length;
+ if(placed===items.length){complete=true;setStatus('모양을 완성했어요!','⭐');}
+ else{setStatus(`좋아요! ${placed}조각을 놓았어요.`,'✅')}
+ render();return true;
+}
+function selectPiece(i){
+ if(i<0||!items[i])return;
+ const p=items[i];
+ if(p.slot>=0){p.slot=-1;p.location='free';}
+ selected=i;complete=false;
+ setStatus(`${PTYPE[p.type]} 선택! 모양 자리로 가져가세요.`,'👆');render();
+}
+function changeLevel(to){const ls=levelsInDeck();if(to<0||to>=ls.length)return;levelIndex=to;setupLevel(true)}
+function switchDeck(d){deck=d;levelIndex=0;setupLevel(true)}
+function rotatePiece(step){if(selected<0)return;const p=items[selected];p.a=((p.a+step+360)%360);setStatus(`${PTYPE[p.type]} 방향을 돌렸어요.`,'↻');render()}
+function onDown(ev){
+ if(ev.button!==undefined&&ev.button!==0)return;
+ const pos=screenToSVG(ev);
+ const tray=ev.target.closest('[data-tray]');
+ const piece=ev.target.closest('[data-piece]');
+ const tar=ev.target.closest('[data-target]');
+ if(piece){
+   const idx=+piece.dataset.piece;selectPiece(idx);
+   drag={i:idx,start:pos,dx:pos.x-items[idx].x,dy:pos.y-items[idx].y,moved:false,source:'board'};
+   game.setPointerCapture(ev.pointerId);ev.preventDefault();return;
+ }
+ if(tray){
+   const idx=+tray.dataset.tray;const it=items[idx];
+   if(it.slot>=0){setStatus('놓은 조각을 다시 옮기려면 왼쪽 조각을 터치하세요.','✅');return}
+   selectPiece(idx);
+   drag={i:idx,start:pos,dx:0,dy:0,moved:false,source:'tray'};
+   game.setPointerCapture(ev.pointerId);ev.preventDefault();return;
+ }
+ if(tar&&selected>=0){
+   placePiece(selected,slots[+tar.dataset.target]);ev.preventDefault();return;
+ }
+ if(selected>=0&&pos.x<895&&pos.x>14){
+   const s=availableSlot(items[selected],pos,200);
+   if(s)placePiece(selected,s);
+ }
+}
+function onMove(ev){if(!drag)return;const pos=screenToSVG(ev);if(!drag.moved&&dist(pos.x,pos.y,drag.start.x,drag.start.y)<9)return;drag.moved=true;const p=items[drag.i];p.location='free';p.slot=-1;complete=false;p.x=pos.x-drag.dx;p.y=pos.y-drag.dy;render();}
+function onUp(ev){if(!drag)return;const d=drag;drag=null;
+ if(!d.moved)return;
+ const p=items[d.i];const slot=availableSlot(p,{x:p.x,y:p.y},124);
+ if(slot){if(!placePiece(d.i,slot)){setStatus('방향을 바꾸거나 모양 자리에 다시 놓아 보세요.','↻');render()}}
+ else{setStatus('조각을 옮겼어요. 같은 모양을 찾아보세요.','👆');render()}
+ try{if(game.hasPointerCapture(ev.pointerId))game.releasePointerCapture(ev.pointerId)}catch(_){ }
+}
+game.addEventListener('pointerdown',onDown);
+game.addEventListener('pointermove',onMove);
+game.addEventListener('pointerup',onUp);
+game.addEventListener('pointercancel',onUp);
+document.querySelectorAll('[data-deck]').forEach(b=>b.addEventListener('click',()=>switchDeck(b.dataset.deck)));
+document.querySelectorAll('[data-hint]').forEach(b=>b.addEventListener('click',()=>{hint=b.dataset.hint;render()}));
+levelSelect.addEventListener('change',ev=>changeLevel(+ev.target.value));
+document.getElementById('auto').addEventListener('change',ev=>{auto=ev.target.checked;render()});
+document.getElementById('rotateL').addEventListener('click',()=>rotatePiece(-45));
+document.getElementById('rotateR').addEventListener('click',()=>rotatePiece(45));
+document.getElementById('resetBtn').addEventListener('click',()=>setupLevel(false));
+document.getElementById('prevBtn').addEventListener('click',()=>changeLevel(levelIndex-1));
+document.getElementById('nextBtn').addEventListener('click',()=>changeLevel(levelIndex+1));
+document.getElementById('successNext').addEventListener('click',()=>changeLevel(levelIndex+1));
+document.getElementById('fullscreenBtn').addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){setStatus('전체 화면 버튼을 사용할 수 없는 환경입니다.','ⓘ')}});
+const help=document.getElementById('help');document.getElementById('helpBtn').addEventListener('click',()=>help.showModal());document.getElementById('helpClose').addEventListener('click',()=>help.close());
+document.addEventListener('keydown',ev=>{if(ev.target===levelSelect||help.open)return;if(ev.key==='ArrowLeft'&&selected>=0){rotatePiece(-45);ev.preventDefault()}if(ev.key==='ArrowRight'&&selected>=0){rotatePiece(45);ev.preventDefault()}if(ev.key==='Escape'){if(selected>=0){selected=-1;render()}}});
+setupLevel(true);
+</script>
+</body>
+</html>

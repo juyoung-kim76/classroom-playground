@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#eef7ff">
+  <title>모래시계 수학놀이 | 움직이는 모래시계</title>
+  <style>
+    :root { --ink:#21344e; --muted:#63738b; --blue:#3579db; --blue-dark:#1d5bb6; --bg:#eff7ff; --stroke:#dbe7f7; --shadow:0 20px 50px rgba(38,84,144,.12); }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;color:var(--ink)}
+    body{background:radial-gradient(circle at 14% 6%,#fff 0,transparent 40%),radial-gradient(circle at 95% 90%,#dff1ff 0,transparent 38%),var(--bg);}
+    button,input,select{font:inherit}
+    button{cursor:pointer;touch-action:manipulation}
+    button:focus-visible,input:focus-visible,select:focus-visible{outline:4px solid #ffba46;outline-offset:3px}
+    .shell{max-width:1510px;margin:0 auto;padding:22px clamp(15px,2.8vw,42px) 30px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
+    h1{font-size:clamp(29px,3.1vw,43px);margin:0;font-weight:900;letter-spacing:-1.5px}
+    header p{margin:6px 0 0;color:var(--muted);font-weight:650;font-size:clamp(16px,1.3vw,19px)}
+    .full-btn{border:2px solid #d7e6f8;background:#fff;color:#285188;border-radius:16px;padding:13px 18px;font-weight:800;white-space:nowrap;font-size:17px;box-shadow:0 5px 20px #d5e4f580}
+    .layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(310px,.86fr);gap:clamp(14px,2vw,28px);align-items:stretch}
+    .stage,.panel{background:#fff;border:2px solid #e3eefc;border-radius:30px;box-shadow:var(--shadow)}
+    .stage{position:relative;min-height:645px;display:flex;flex-direction:column;align-items:center;padding:18px 16px 16px;overflow:hidden;background:linear-gradient(175deg,#fff 0%,#fafdff 65%,#f1f8ff 100%)}
+    .timer-label{color:#526d8b;font-size:clamp(18px,1.5vw,22px);font-weight:800;margin:0}
+    .timer-value{font-variant-numeric:tabular-nums;font-size:clamp(55px,6vw,94px);font-weight:900;line-height:1.1;letter-spacing:2px;color:#244e85;margin:2px 0 0;min-height:1.12em}
+    .stage.is-observe .timer-value{font-size:clamp(27px,2.6vw,37px);letter-spacing:-.5px;padding-top:25px}
+    .hourglass-wrap{width:min(100%,490px);flex:1;min-height:380px;display:flex;align-items:center;justify-content:center;position:relative;margin-top:-9px}
+    canvas{width:100%;height:100%;max-height:560px;object-fit:contain;display:block;}
+    .status{display:flex;align-items:center;justify-content:center;gap:9px;min-height:56px;width:min(100%,500px);background:#eaf4ff;color:#23548c;border-radius:16px;font-size:clamp(18px,1.7vw,23px);font-weight:850;text-align:center;padding:9px 14px;margin-top:0}
+    .status.done{background:#eaf8ec;color:#257342}
+    .status.running{background:#fff4df;color:#89601f}
+    .progress{height:13px;width:min(100%,500px);background:#e4edf8;border-radius:50px;overflow:hidden;margin-top:13px}
+    .progress>div{height:100%;width:0%;background:linear-gradient(90deg,#f5bb5c,#df953c);border-radius:50px;transition:width .12s linear}
+    .panel{padding:clamp(18px,2.2vw,31px);display:flex;flex-direction:column;gap:20px}
+    .panel h2{font-size:clamp(24px,2vw,29px);font-weight:900;letter-spacing:-.5px;margin:0 0 12px}
+    .preset-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .preset{min-height:65px;border:2px solid #dbe7f7;border-radius:16px;background:#f8fbff;font-weight:850;color:#355a85;font-size:clamp(17px,1.6vw,22px)}
+    .preset.active{background:#e4f0ff;border-color:var(--blue);color:#194f9d;box-shadow:inset 0 0 0 1px var(--blue)}
+    .preset:hover{background:#ecf5ff}
+    .section-sep{height:1px;background:#e4ecf7}
+    .custom-row{display:grid;grid-template-columns:minmax(0,1fr) 100px;gap:10px}
+    .custom-row input,.custom-row select{height:67px;border:2px solid #cfdef0;border-radius:15px;background:#fff;color:#21344e;font-size:clamp(25px,2vw,31px);font-weight:800;text-align:center;min-width:0}
+    .custom-row select{font-size:22px;text-align:center;padding:0 9px}
+    .apply{width:100%;margin-top:10px;padding:14px;border:2px solid #bdd6f7;background:#e9f3ff;color:#1a579e;border-radius:14px;font-size:20px;font-weight:800}
+    .setting-hint{font-size:15px;color:var(--muted);margin:9px 2px 0;text-align:center}
+    .action-group{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .btn-main{grid-column:1/-1;min-height:78px;border:none;background:#3176db;color:#fff;font-size:clamp(23px,2.25vw,30px);font-weight:900;border-radius:18px;box-shadow:0 9px 15px #bcd6fa}
+    .btn-main:hover{background:#2365c7}
+    .btn-secondary{min-height:67px;border:2px solid #ccdcf1;background:#fff;color:#284c77;border-radius:17px;font-size:clamp(19px,1.5vw,22px);font-weight:850}
+    .btn-secondary:disabled{opacity:.48;cursor:not-allowed}
+    .toggle-row{display:flex;align-items:center;gap:12px;font-size:19px;font-weight:750;padding:6px 0;cursor:pointer;line-height:1.35}
+    .toggle-row input{width:25px;height:25px;accent-color:#3479dc;flex:none;cursor:pointer}
+    .tips{font-size:15px;color:#697c95;background:#f5f9ff;padding:14px 16px;border-radius:15px;line-height:1.6;margin-top:auto}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:970px){.layout{grid-template-columns:1fr}.stage{min-height:570px}.panel{gap:16px}.hourglass-wrap{max-height:550px;height:440px;flex:auto}canvas{max-height:480px}.tips{margin-top:0}}
+    @media(max-width:560px){.shell{padding:12px}.stage,.panel{border-radius:20px}header{align-items:flex-start}header p{max-width:270px}.full-btn{font-size:14px;padding:11px}.stage{min-height:525px}.hourglass-wrap{height:360px;min-height:315px}.preset{min-height:54px}.btn-main{min-height:67px}.btn-secondary{min-height:58px}.toggle-row{font-size:17px}}
+    :fullscreen .shell{max-width:unset;min-height:100vh;padding:1.3vh 2vw;background:#eef7ff;display:flex;flex-direction:column}
+    :fullscreen .layout{flex:1;min-height:0;grid-template-columns:minmax(0,1.35fr) minmax(320px,.72fr)}
+    :fullscreen .stage{min-height:0}
+    :fullscreen .hourglass-wrap{min-height:0;flex:1;max-height:65vh}
+    :fullscreen .panel{overflow:auto}
+    @media (prefers-reduced-motion:reduce){.progress>div{transition:none}}
+  </style>
+</head>
+<body>
+<div class="shell" id="app">
+  <header>
+    <div><h1>⌛ 모래시계 놀이</h1><p>모래가 위에서 아래로 내려가는 모습을 살펴봐요.</p></div>
+    <button class="full-btn" id="fullscreen" type="button">⛶ 화면 크게 보기</button>
+  </header>
+  <main class="layout">
+    <section class="stage" aria-label="움직이는 모래시계">
+      <p class="timer-label" id="timerLabel">남은 시간</p>
+      <div class="timer-value" id="timeDisplay" role="timer" aria-live="off">01:00</div>
+      <div class="hourglass-wrap"><canvas id="glassCanvas" width="560" height="660" role="img" aria-label="모래가 위에서 아래로 떨어지는 모래시계 애니메이션">모래시계 애니메이션</canvas></div>
+      <div class="status" id="status" role="status" aria-live="polite">✨ 시작 버튼을 눌러요!</div>
+      <div class="progress" role="progressbar" aria-label="지나간 시간" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><div id="progressFill"></div></div>
+    </section>
+    <aside class="panel" aria-label="모래시계 설정과 조작">
+      <section>
+        <h2>① 시간 정하기</h2>
+        <div class="preset-grid" id="presets">
+          <button type="button" class="preset" data-seconds="10">10초</button>
+          <button type="button" class="preset" data-seconds="30">30초</button>
+          <button type="button" class="preset active" data-seconds="60">1분</button>
+          <button type="button" class="preset" data-seconds="120">2분</button>
+          <button type="button" class="preset" data-seconds="180">3분</button>
+          <button type="button" class="preset" data-seconds="300">5분</button>
+        </div>
+      </section>
+      <div class="section-sep"></div>
+      <section>
+        <h2>원하는 시간 입력</h2>
+        <div class="custom-row">
+          <label class="sr-only" for="duration">시간 숫자</label>
+          <input id="duration" type="number" min="1" max="10800" step="1" inputmode="numeric" value="1" aria-label="시간 숫자 입력">
+          <label class="sr-only" for="unit">시간 단위</label>
+          <select id="unit" aria-label="초 또는 분"><option value="1">초</option><option value="60" selected>분</option></select>
+        </div>
+        <button type="button" class="apply" id="apply">시간 적용하기</button>
+        <p class="setting-hint" id="settingHint">설정한 시간: 1분</p>
+      </section>
+      <div class="section-sep"></div>
+      <section>
+        <h2>② 움직여 보기</h2>
+        <div class="action-group">
+          <button id="start" type="button" class="btn-main">▶ 시작</button>
+          <button id="pause" type="button" class="btn-secondary" disabled>Ⅱ 잠깐 멈춤</button>
+          <button id="reset" type="button" class="btn-secondary">↻ 처음부터</button>
+        </div>
+      </section>
+      <div class="section-sep"></div>
+      <section>
+        <label class="toggle-row"><input type="checkbox" id="observe">숫자 가리고 모래만 관찰하기</label>
+        <label class="toggle-row"><input type="checkbox" id="tickSound" checked>🔔 1초마다 ‘띵’ 소리 듣기</label>
+        <label class="toggle-row"><input type="checkbox" id="sound">끝날 때 소리 듣기</label>
+      </section>
+      <p class="tips">💡 수업 팁: 10초로 시작해 ‘띵’ 소리가 날 때마다 함께 하나씩 세어 보세요. 1분으로 바꾸면 60번의 소리를 들으며 시간의 흐름을 경험할 수 있어요.<br>⌨️ 키보드: 스페이스바 = 시작·멈춤 / R = 처음부터</p>
+    </aside>
+  </main>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const canvas=$('glassCanvas');
+  const ctx=canvas.getContext('2d');
+  const view={w:560,h:660};
+  const startBtn=$('start'), pauseBtn=$('pause'), resetBtn=$('reset');
+  const timerLabel=$('timerLabel'),timeDisplay=$('timeDisplay'), status=$('status');
+  const progressFill=$('progressFill'),progressBar=$('progressBar');
+  const durationEl=$('duration'),unitEl=$('unit'),settingHint=$('settingHint');
+  const presets=[...document.querySelectorAll('.preset')];
+  let totalSec=60,elapsed=0,running=false,startStamp=0,frameHandle=0,complete=false;
+  let rafPhase=0;
+  let audioCtx=null;
+  let lastTickSecond=0;
+
+  function fmt(s) {s=Math.max(0,Math.ceil(s-0.00001));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+  function pretty(s) {let m=Math.floor(s/60),r=s%60;return m&&r?`${m}분 ${r}초`:m?`${m}분`:`${r}초`;}
+  function getElapsed(){return running?Math.min(totalSec,elapsed+(performance.now()-startStamp)/1000):elapsed;}
+  function showStatus(message,type='') {status.textContent=message;status.className='status'+(type?' '+type:'');}
+  function updateUI(){
+    const t=Math.min(totalSec,getElapsed());
+    const progress=totalSec>0?Math.min(1,t/totalSec):0;
+    if($('observe').checked){timerLabel.textContent='모래 움직임 관찰하기';timeDisplay.textContent='⌛';document.querySelector('.stage').classList.add('is-observe');}
+    else{timerLabel.textContent='남은 시간';timeDisplay.textContent=fmt(totalSec-t);document.querySelector('.stage').classList.remove('is-observe');}
+    progressFill.style.width=(progress*100).toFixed(3)+'%';progressBar.setAttribute('aria-valuenow',String(Math.round(progress*100)));
+    return progress;
+  }
+  function buttons(){startBtn.textContent=complete?'↻ 다시 시작':running?'▶ 모래가 내려가요':'▶ 시작';startBtn.disabled=running;pauseBtn.disabled=!running;}
+  function choosePreset(){presets.forEach(b=>b.classList.toggle('active',Number(b.dataset.seconds)===totalSec));}
+  function selectTime(s){
+    if(!Number.isFinite(s)||s<1||s>10800){showStatus('1초부터 180분까지 설정할 수 있어요.');return false;}
+    totalSec=Math.round(s);elapsed=0;running=false;complete=false;cancelAnimationFrame(frameHandle);rafPhase=0;lastTickSecond=0;
+    choosePreset();
+    if(totalSec%60===0){durationEl.value=totalSec/60;unitEl.value='60';}
+    else{durationEl.value=totalSec;unitEl.value='1';}
+    settingHint.textContent='설정한 시간: '+pretty(totalSec);
+    buttons();showStatus('✨ 시작 버튼을 눌러요!');updateUI();draw(0,0);
+    return true;
+  }
+  function start(){
+    if(running)return;
+    if(complete){elapsed=0;complete=false;}
+    // Start audio within a user click, as required by Chrome/Edge autoplay rules.
+    if($('tickSound').checked || $('sound').checked)unlockAudio();
+    lastTickSecond=Math.floor(elapsed);
+    running=true;startStamp=performance.now();buttons();showStatus('⏳ 모래가 내려가고 있어요!','running');cancelAnimationFrame(frameHandle);frame();
+  }
+  function pause(){if(!running)return;elapsed=getElapsed();running=false;cancelAnimationFrame(frameHandle);buttons();showStatus('⏸ 모래시계가 잠깐 멈췄어요.');updateUI();draw(elapsed/totalSec,rafPhase);}
+  function reset(){selectTime(totalSec);}
+  function finish(){
+    elapsed=totalSec;running=false;complete=true;cancelAnimationFrame(frameHandle);
+    buttons();updateUI();draw(1,rafPhase);showStatus('🎉 모래가 모두 내려왔어요!','done');
+    if($('sound').checked)chime();
+  }
+  function frame(){
+    if(!running)return;
+    let p=updateUI();rafPhase=performance.now()/1000;
+    draw(p,rafPhase);
+    // Sound once as each FULL second passes. Never play a burst of missed ticks.
+    const currentSecond=Math.floor(getElapsed()+0.000001);
+    if(currentSecond>lastTickSecond){
+      lastTickSecond=currentSecond;
+      if($('tickSound').checked)playSecondTick();
+    }
+    if(p>=1){finish();return;}
+    frameHandle=requestAnimationFrame(frame);
+  }
+  function unlockAudio(){
+    try{
+      if(!audioCtx){
+        const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+        if(!AudioContextClass)return;
+        audioCtx=new AudioContextClass();
+      }
+      if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+    }catch(e){/* Audio is optional on devices that block it. */}
+  }
+  function playSecondTick(){
+    // One soft bell per second: short fundamental with a quieter overtone.
+    if(!audioCtx || audioCtx.state!=='running')return;
+    try{
+      const now=audioCtx.currentTime+0.004;
+      [[880,0.075,0.22],[1320,0.022,0.15]].forEach(([frequency,volume,duration])=>{
+        const osc=audioCtx.createOscillator();
+        const gain=audioCtx.createGain();
+        osc.type='sine';osc.frequency.setValueAtTime(frequency,now);
+        gain.gain.setValueAtTime(0.0001,now);
+        gain.gain.exponentialRampToValueAtTime(volume,now+0.008);
+        gain.gain.exponentialRampToValueAtTime(0.0001,now+duration);
+        osc.connect(gain);gain.connect(audioCtx.destination);
+        osc.start(now);osc.stop(now+duration+0.015);
+      });
+    }catch(e){/* Keep animation working without sound. */}
+  }
+  function chime(){
+    try {
+      audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==='suspended')audioCtx.resume();
+      [0,.2].forEach((offset,i)=>{
+        const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+        o.type='sine';o.frequency.value=i?784:659;
+        g.gain.setValueAtTime(.0001,audioCtx.currentTime+offset);
+        g.gain.exponentialRampToValueAtTime(.14,audioCtx.currentTime+offset+.025);
+        g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+offset+.6);
+        o.connect(g);g.connect(audioCtx.destination);o.start(audioCtx.currentTime+offset);o.stop(audioCtx.currentTime+offset+.62);
+      });
+    }catch(e){/* Sound is optional; silent fallback. */}
+  }
+  function pathGlass(){
+    ctx.beginPath();ctx.moveTo(134,93);
+    ctx.bezierCurveTo(130,159,169,220,263,312);
+    ctx.quadraticCurveTo(275,323,275,328);
+    ctx.quadraticCurveTo(275,333,263,345);
+    ctx.bezierCurveTo(169,439,130,501,134,564);
+    ctx.quadraticCurveTo(280,576,426,564);
+    ctx.bezierCurveTo(430,501,391,439,297,345);
+    ctx.quadraticCurveTo(285,333,285,328);
+    ctx.quadraticCurveTo(285,323,297,312);
+    ctx.bezierCurveTo(391,220,430,159,426,93);
+    ctx.quadraticCurveTo(280,79,134,93);ctx.closePath();
+  }
+  function topWidth(y){const u=Math.max(0,Math.min(1,(y-110)/214));return 11+134*Math.pow(1-u,1.15);}
+  function botWidth(y){const u=Math.max(0,Math.min(1,(y-335)/230));return 11+134*Math.pow(u,1.15);}
+  // Approximate 2D area of the glass cross-section, to match sand fill with elapsed time.
+  function area(fn,a,b){if(b<=a)return 0;const n=32,step=(b-a)/n;let sum=0;for(let j=0;j<=n;j++)sum+=fn(a+j*step)*(j===0||j===n?1:(j%2?4:2));return sum*step/3;}
+  const topArea=area(topWidth,110,322),botArea=area(botWidth,335,565);
+  function topSurface(fraction){let lo=110,hi=322;for(let i=0;i<19;i++){let mid=(lo+hi)/2;if(area(topWidth,mid,322)>topArea*fraction)lo=mid;else hi=mid;}return (lo+hi)/2;}
+  function bottomSurface(fraction){let lo=335,hi=565;for(let i=0;i<19;i++){let mid=(lo+hi)/2;if(area(botWidth,mid,565)>botArea*fraction)lo=mid;else hi=mid;}return (lo+hi)/2;}
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
+  function draw(p,t){
+    ctx.clearRect(0,0,view.w,view.h);
+    ctx.save();
+    // Soft halo behind the hourglass, without visual distractions.
+    let halo=ctx.createRadialGradient(280,335,90,280,335,305);
+    halo.addColorStop(0,'rgba(225,241,255,.40)');halo.addColorStop(1,'rgba(225,241,255,0)');ctx.fillStyle=halo;ctx.fillRect(15,12,530,625);
+    // Shadow, glass side uprights, wood frame feet and caps.
+    ctx.fillStyle='rgba(51,80,120,.12)';ctx.beginPath();ctx.ellipse(280,618,194,17,0,0,Math.PI*2);ctx.fill();
+    [109,451].forEach(x=>{
+      const grad=ctx.createLinearGradient(x-9,0,x+10,0);grad.addColorStop(0,'#bc7a3a');grad.addColorStop(.38,'#ffd49a');grad.addColorStop(.78,'#dc9c53');grad.addColorStop(1,'#9c642d');
+      ctx.fillStyle=grad;roundRect(x-10,77,20,502,9);ctx.fill();
+    });
+    // Glass gradient and clipped interior.
+    pathGlass();const glass=ctx.createLinearGradient(120,0,450,0);
+    glass.addColorStop(0,'rgba(185,226,255,.65)');glass.addColorStop(.18,'rgba(241,252,255,.74)');glass.addColorStop(.50,'rgba(245,253,255,.38)');glass.addColorStop(.82,'rgba(240,252,255,.72)');glass.addColorStop(1,'rgba(165,217,251,.68)');
+    ctx.fillStyle=glass;ctx.fill();
+    ctx.save();pathGlass();ctx.clip();
+    const yTop=topSurface(1-p),yBot=bottomSurface(p);
+    // Top bulb drains into the narrow neck.
+    if(p<1){
+      const sand=ctx.createLinearGradient(0,yTop,0,325);sand.addColorStop(0,'#ffce74');sand.addColorStop(1,'#e7a549');ctx.fillStyle=sand;
+      ctx.fillRect(105,yTop,350,327-yTop);
+      ctx.strokeStyle='#f8d98f';ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(110,yTop+1);ctx.lineTo(450,yTop+1);ctx.stroke();
+    }
+    // Bottom bulb fills; a small mound grows under the falling stream.
+    if(p>0){
+      const sand=ctx.createLinearGradient(0,335,0,565);sand.addColorStop(0,'#f8c567');sand.addColorStop(1,'#e7a24c');ctx.fillStyle=sand;
+      const mound=Math.min(14,5+18*Math.sqrt(p));
+      ctx.beginPath();ctx.moveTo(105,yBot+1);
+      ctx.lineTo(225,yBot+1);
+      ctx.quadraticCurveTo(280,yBot-mound,335,yBot+1);
+      ctx.lineTo(455,yBot+1);ctx.lineTo(455,585);ctx.lineTo(105,585);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='#ffdda0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(132,yBot+1);ctx.lineTo(225,yBot+1);ctx.quadraticCurveTo(280,yBot-mound,335,yBot+1);ctx.lineTo(428,yBot+1);ctx.stroke();
+    }
+    // Individual visible grains dropping down the neck and into the lower bulb.
+    if(running&&p<.9999){
+      const downTo=Math.max(343,yBot-8),fallStart=319;
+      ctx.fillStyle='#e3a049';
+      ctx.beginPath();ctx.ellipse(280,329,5,9,0,0,Math.PI*2);ctx.fill();
+      for(let i=0;i<49;i++){
+        const seed=i*.61803398875;
+        const progress=((seed+t*(.9+(i%3)*.21))%1+1)%1;
+        const y=fallStart+(downTo-fallStart)*progress;
+        const sway=Math.sin(i*12.77+progress*9)*((y<360)?2.3:5.6);
+        ctx.fillStyle=i%3===0?'#f9c46b':'#dc9942';ctx.beginPath();ctx.arc(280+sway,y,1.1+(i%4)*.25,0,Math.PI*2);ctx.fill();
+      }
+    }
+    ctx.restore();
+    // Glass rim and reflections.
+    pathGlass();ctx.strokeStyle='rgba(84,164,207,.63)';ctx.lineWidth=5;ctx.stroke();
+    ctx.save();ctx.beginPath();ctx.moveTo(148,126);ctx.bezierCurveTo(154,177,198,246,259,306);ctx.strokeStyle='rgba(255,255,255,.83)';ctx.lineWidth=10;ctx.lineCap='round';ctx.stroke();
+    ctx.beginPath();ctx.moveTo(411,130);ctx.bezierCurveTo(400,185,361,244,300,309);ctx.strokeStyle='rgba(255,255,255,.54)';ctx.lineWidth=6;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(146,550);ctx.bezierCurveTo(146,507,181,437,255,361);ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=8;ctx.stroke();ctx.restore();
+    // Decorative top and base: bright wooden caps.
+    const wood=ctx.createLinearGradient(0,0,0,45);wood.addColorStop(0,'#ffd89b');wood.addColorStop(.48,'#e8a35c');wood.addColorStop(1,'#b97b40');
+    ctx.fillStyle=wood;roundRect(90,61,380,39,18);ctx.fill();roundRect(90,559,380,39,18);ctx.fill();
+    ctx.fillStyle='#ffdeb3';roundRect(103,64,354,10,5);ctx.fill();roundRect(103,562,354,10,5);ctx.fill();
+    ctx.strokeStyle='#bb7d43';ctx.lineWidth=2.5;roundRect(90,61,380,39,18);ctx.stroke();roundRect(90,559,380,39,18);ctx.stroke();
+    ctx.restore();
+  }
+  presets.forEach(b=>b.addEventListener('click',()=>selectTime(Number(b.dataset.seconds))));
+  $('apply').addEventListener('click',()=>{
+    const num=Number(durationEl.value),unit=Number(unitEl.value);
+    if(!Number.isInteger(num)||num<1||num*unit>10800){
+      window.alert('1초부터 180분까지 정수로 입력해 주세요.');durationEl.focus();return;
+    }
+    selectTime(num*unit);
+  });
+  durationEl.addEventListener('keydown',e=>{if(e.key==='Enter')$('apply').click();});
+  startBtn.addEventListener('click',start);pauseBtn.addEventListener('click',pause);resetBtn.addEventListener('click',reset);
+  $('observe').addEventListener('change',()=>{updateUI();});
+  $('tickSound').addEventListener('change',()=>{if($('tickSound').checked)unlockAudio();});
+  $('sound').addEventListener('change',()=>{if($('sound').checked)unlockAudio();});
+  $('fullscreen').addEventListener('click',async()=>{
+    try{
+      if(!document.fullscreenElement){await $('app').requestFullscreen();$('fullscreen').textContent='⛶ 전체 화면 닫기';}
+      else{await document.exitFullscreen();$('fullscreen').textContent='⛶ 화면 크게 보기';}
+    }catch(e){showStatus('이 브라우저에서는 전체 화면이 제한되어 있어요.');}
+  });
+  document.addEventListener('fullscreenchange',()=>{$('fullscreen').textContent=document.fullscreenElement?'⛶ 전체 화면 닫기':'⛶ 화면 크게 보기';});
+  document.addEventListener('keydown',e=>{
+    const target=e.target;
+    if(target instanceof HTMLElement && (target.matches('input,select,button,textarea')||target.isContentEditable))return;
+    if(e.code==='Space'){e.preventDefault();running?pause():start();}
+    else if(e.key.toLowerCase()==='r'){e.preventDefault();reset();}
+  });
+  // Resize for crisp rendering on projectors, whiteboards and Retina displays.
+  function sizeCanvas(){
+    const ratio=Math.max(1,Math.min(2.5,window.devicePixelRatio||1));
+    canvas.width=Math.round(view.w*ratio);canvas.height=Math.round(view.h*ratio);
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+    draw(getElapsed()/totalSec,rafPhase);
+  }
+  window.addEventListener('resize',sizeCanvas);
+  sizeCanvas();updateUI();buttons();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+{
+  "version": "2026-10-29.1",
+  "activities": [
+    {
+      "id": "compare",
+      "title": "큰 수 고르기",
+      "detail": "두 수의 크기 비교 · 터치",
+      "subject": "math",
+      "icon": "numbers",
+      "path": "activities/compare.html",
+      "tag": "새 게임"
+    },
+    {
+      "id": "daynight",
+      "title": "낮과 밤",
+      "detail": "실사 그림 분류하기",
+      "subject": "math",
+      "icon": "sun",
+      "path": "activities/daynight_photo.html"
+    },
+    {
+      "id": "tangram-new",
+      "title": "탱그램 · 새로운 모양",
+      "detail": "조각을 직접 돌려 맞추기",
+      "subject": "math",
+      "icon": "puzzle",
+      "path": "activities/tangram_new.html"
+    },
+    {
+      "id": "tangram",
+      "title": "탱그램 · 기본",
+      "detail": "기초 모양 구성하기",
+      "subject": "math",
+      "icon": "puzzle",
+      "path": "activities/tangram_original.html"
+    },
+    {
+      "id": "half",
+      "title": "반쪽 그림 찾기",
+      "detail": "그림 완성하기",
+      "subject": "math",
+      "icon": "butterfly",
+      "path": "activities/half_picture.html"
+    },
+    {
+      "id": "hourglass",
+      "title": "모래시계",
+      "detail": "시간의 흐름 · 초 소리",
+      "subject": "math",
+      "icon": "hourglass",
+      "path": "activities/hourglass.html"
+    },
+    {
+      "id": "big-sheet",
+      "title": "큰 수 찾기 활동지",
+      "detail": "무작위 문제 · 인쇄",
+      "subject": "math",
+      "icon": "print",
+      "path": "activities/big_number_sheet.html"
+    },
+    {
+      "id": "order-sheet",
+      "title": "수의 순서 활동지",
+      "detail": "순서 문제 만들기",
+      "subject": "math",
+      "icon": "order",
+      "path": "activities/number_order_sheet.html"
+    },
+    {
+      "id": "daynight-alt",
+      "title": "낮과 밤 · 다른 그림",
+      "detail": "예전 그림 버전",
+      "subject": "math",
+      "icon": "moon",
+      "path": "activities/daynight_illustrated.html"
+    },
+    {
+      "id": "leaf-boat",
+      "title": "나뭇잎 배 놀이",
+      "detail": "잎을 물에 띄워요",
+      "subject": "joy",
+      "icon": "leaf",
+      "path": "activities/leaf_boat.html",
+      "tag": "새 게임"
+    },
+    {
+      "id": "summer-forest",
+      "title": "교실 속 여름 숲",
+      "detail": "자연물로 숲 꾸미기",
+      "subject": "joy",
+      "icon": "tree",
+      "path": "activities/summer_forest.html",
+      "tag": "새 게임"
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#f1f6fd">
+<title>탱그램 새로운 모양 20개 · 전자칠판</title>
+<style>
+:root{--ink:#18314d;--muted:#63798f;--sky:#2563eb;--line:#d9e3f0;--round:19px}
+*{box-sizing:border-box}
+html,body{height:100%;width:100%;margin:0;overflow:hidden}
+body{font-family:"Pretendard","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;color:var(--ink);background:#eef4fb;-webkit-tap-highlight-color:transparent}
+button,select{font:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,select:focus-visible{outline:4px solid #f5bc39;outline-offset:2px}
+#app{height:100dvh;display:flex;flex-direction:column;gap:0;min-height:440px}
+header{min-height:72px;padding:10px 25px 9px;display:flex;align-items:center;justify-content:space-between;gap:20px;background:white;border-bottom:1px solid #e5edf7}
+.heading{display:flex;gap:15px;align-items:center;min-width:240px}.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;background:#dbeafe;color:#2354c4;font-size:28px;font-weight:900}.heading h1{font-size:26px;line-height:1.15;margin:0;letter-spacing:-.9px}.heading small{display:block;font-size:14px;color:var(--muted);margin-top:3px;letter-spacing:-.2px}.top-actions{display:flex;gap:9px}
+button{border:1.5px solid var(--line);border-radius:13px;background:white;color:var(--ink);padding:11px 15px;white-space:nowrap;font-weight:760;font-size:16px;transition:background .12s,transform .12s}
+button:active{transform:scale(.97)}button:hover{background:#f0f6ff}button:disabled{opacity:.45;cursor:not-allowed}.primary{border-color:var(--sky);background:var(--sky);color:white}.primary:hover{background:#1749c0}.soft{background:#f3f7fc}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 24px;background:#fbfdff;border-bottom:1px solid #dde8f5;flex-wrap:wrap;min-height:76px}
+.group{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}.group>label{font-weight:800;color:#4d627b;margin-right:7px;font-size:14px}.segment{display:flex;background:#e9f0fa;padding:4px;border-radius:14px;gap:3px}.segment button{border:0;background:transparent;padding:10px 14px;border-radius:11px}.segment button.active{background:#fff;box-shadow:0 2px 7px #315a8a23;color:#1346a3}
+select{height:47px;padding:0 30px 0 13px;border:1.5px solid var(--line);border-radius:12px;background:white;color:var(--ink);font-size:15px;font-weight:800;max-width:240px}
+.wide{min-width:84px}.rotate button{font-size:23px;min-width:54px;padding:6px 12px;line-height:1.3}.toggle{display:flex;gap:6px;align-items:center;font-size:14px;font-weight:800;cursor:pointer;white-space:nowrap}.toggle input{width:22px;height:22px;accent-color:#2b6bd3;cursor:pointer}
+.board-wrap{flex:1;position:relative;min-height:0;padding:10px 12px 6px}svg{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none;background:#f4f7fc;border-radius:22px;box-shadow:inset 0 1px 6px #849db724;cursor:default}
+svg [data-tray],svg [data-piece],svg [data-target]{cursor:pointer;touch-action:none}
+svg text{pointer-events:none;font-family:"Malgun Gothic",system-ui,sans-serif}
+footer{height:74px;min-height:74px;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:11px 23px 12px;gap:14px;border-top:1px solid #dae5f2}.status{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:800;min-width:0}.status-icon{height:42px;width:42px;border-radius:14px;background:#e6f1ff;display:grid;place-items:center;font-size:25px}.status-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.counter{color:#496eaa;font-size:16px;font-weight:900}.nav{display:flex;align-items:center;gap:10px}.nav button{min-width:118px}
+#success{display:none;position:absolute;top:46%;left:36%;transform:translate(-50%,-50%);pointer-events:auto;text-align:center;background:#ffffffed;border:3px solid #a8cae7;box-shadow:0 20px 65px #18314d2c;padding:24px 38px;border-radius:29px;min-width:350px;z-index:3}
+#success h2{font-size:38px;margin:3px 0 5px;color:#1472ab}#success p{font-size:18px;color:#536b80;margin:0 0 16px;font-weight:700}.stars{font-size:31px;letter-spacing:10px;color:#f0a823}
+#help{border:0;border-radius:20px;padding:24px 27px;max-width:590px;background:#fff;color:var(--ink);box-shadow:0 18px 60px #0004}#help::backdrop{background:#0a1b33a8}#help h2{margin:0 0 14px;font-size:27px}#help p{line-height:1.7;font-size:18px;margin:8px 0}#help button{margin-top:13px}
+.tiny-tip{font-size:13px;color:#63798f;margin-left:3px;font-weight:700}
+@media(max-width:1240px){.toolbar{gap:9px;padding:8px 10px}.heading h1{font-size:23px}.segment button{padding:9px 10px}.toolbar button{font-size:14px}header{padding:8px 16px}.group>label{display:none}}
+@media(max-height:710px){header{min-height:60px}.toolbar{min-height:63px;padding-top:6px;padding-bottom:6px}footer{height:61px;min-height:61px}.heading h1{font-size:21px}.heading small{font-size:12px}button{padding:8px 11px}.logo{width:39px;height:39px}}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="heading"><div class="logo">◩</div><div><h1>탱그램 새로운 모양</h1><small>올려주신 40쪽 활동지 그대로 · 20가지 모양</small></div></div>
+  <div class="top-actions"><button id="helpBtn" aria-label="사용 방법">❔ 사용 방법</button><button id="fullscreenBtn">⛶ 전체 화면</button></div>
+</header>
+<div class="toolbar">
+  <div class="group"><label>활동</label><select id="levelSelect" aria-label="20가지 모양 선택"></select><span class="tiny-tip">3조각 → 7조각</span></div>
+  <div class="group"><label>힌트</label><div class="segment" id="hintTabs"><button data-hint="color">색깔 도움</button><button data-hint="lines" class="active">조각 선</button><button data-hint="shadow">겉모양</button></div></div>
+  <div class="group rotate"><label>방향</label><button id="rotateL" title="선택한 조각 왼쪽 45도">↶</button><button id="rotateR" title="선택한 조각 오른쪽 45도">↷</button><label class="toggle"><input id="auto" type="checkbox" checked>놓으면 방향 맞춤</label><button id="putBackBtn" class="soft">조각 빼기</button><button id="resetBtn" class="soft">↺ 다시하기</button></div>
+</div>
+<div class="board-wrap">
+ <svg id="game" viewBox="0 0 1200 740" preserveAspectRatio="xMidYMid meet" role="img" aria-label="터치로 탱그램 조각을 맞추는 활동판"></svg>
+ <div id="success" role="status" aria-live="polite"><div class="stars">★ ★ ★</div><h2>완성했어요!</h2><p>멋지게 모양을 만들었어요.</p><button class="primary" id="successNext">다음 모양 →</button></div>
+</div>
+<footer>
+ <div class="status"><span class="status-icon" id="statusIcon">✋</span><div class="status-text" id="status">오른쪽 조각을 터치해 보세요.</div><span class="counter" id="progress">0 / 1</span></div>
+ <div class="nav"><button id="prevBtn">← 이전 모양</button><button class="primary" id="nextBtn">다음 모양 →</button></div>
+</footer>
+</div>
+<dialog id="help">
+  <h2>전자칠판 사용 방법</h2>
+  <p>① 오른쪽 <strong>조각 바구니</strong>에서 조각을 손으로 터치합니다. 오른쪽 조각들은 모두 화면에 보입니다.</p>
+  <p>② 왼쪽의 같은 모양 위로 <strong>끌어다 놓아요.</strong> 조각을 터치한 다음 빈 모양을 터치해도 됩니다.</p>
+  <p>③ <strong>↶ ↷</strong> 버튼으로 선택한 조각을 돌릴 수 있습니다. 어려우면 「놓으면 방향 맞춤」을 켜 두세요.</p>
+  <p>④ 「조각 선」은 PDF의 홀수 쪽, 「겉모양」은 짝수 쪽 도안과 같습니다. 「색깔 도움」을 켜면 더 쉽게 시작할 수 있어요.</p><p>⑤ 조각을 다시 바구니로 옮기려면 선택한 뒤 <strong>「조각 빼기」</strong>를 누르세요.</p>
+  <p>올려주신 원본과 같이 평행사변형은 뒤집지 않고 회전하여 맞춥니다. 인터넷 연결 없이 작동합니다.</p>
+  <button class="primary" id="helpClose">시작하기</button>
+</dialog>
+<script>
+'use strict';
+const DATA={"bases":{"large":[[-141.732,47.244],[141.732,47.244],[-0.0,-94.488]],"small":[[23.622,70.866],[23.622,-70.866],[-47.244,0.0]],"medium":[[47.244,-47.244],[-94.488,-47.244],[47.244,94.488]],"new:para":[[35.433,-35.433],[-106.299,-35.433],[-35.433,35.433],[106.299,35.433]],"square":[[-50.11,50.11],[-50.11,-50.11],[50.11,-50.11],[50.11,50.11]]},"levels":[{"deck":"new","n":1,"name":"새로운 모양 01","pieces":[{"type":"large","x":297.638,"y":511.181,"a":0,"color":"#F19C9C"},{"type":"small","x":415.748,"y":487.559,"a":0,"color":"#FFD96A"},{"type":"small","x":250.394,"y":416.693,"a":180,"color":"#F2A0C1"}],"bounds":[155.91,345.83,439.37,558.43],"silhouette":"M155.91,558.43 L226.77,487.56 L226.77,345.83 L297.64,416.69 L368.50,487.56 L439.37,416.69 L439.37,558.43Z"},{"deck":"new","n":2,"name":"새로운 모양 02","pieces":[{"type":"large","x":297.638,"y":404.882,"a":0,"color":"#F19C9C"},{"type":"small","x":368.504,"y":334.016,"a":270,"color":"#FFD96A"},{"type":"large","x":297.638,"y":499.37,"a":180,"color":"#FFB973"}],"bounds":[155.91,310.39,439.37,593.86],"silhouette":"M297.64,593.86 L155.91,452.13 L297.64,310.39 L439.37,310.39 L368.50,381.26 L439.37,452.13Z"},{"deck":"new","n":3,"name":"새로운 모양 03","pieces":[{"type":"large","x":262.205,"y":475.748,"a":0,"color":"#F19C9C"},{"type":"medium","x":356.693,"y":428.504,"a":0,"color":"#76B7E9"},{"type":"small","x":427.559,"y":452.126,"a":180,"color":"#FFD96A"}],"bounds":[120.47,381.26,474.8,522.99],"silhouette":"M120.47,522.99 L262.20,381.26 L403.94,381.26 L474.80,452.13 L403.94,522.99Z"},{"deck":"new","n":4,"name":"새로운 모양 04","pieces":[{"type":"large","x":297.638,"y":511.181,"a":0,"color":"#F19C9C"},{"type":"medium","x":392.126,"y":463.937,"a":0,"color":"#76B7E9"},{"type":"para","x":262.205,"y":593.858,"a":0,"color":"#B99AE6"},{"type":"large","x":297.638,"y":369.449,"a":0,"color":"#FFB973"}],"bounds":[155.91,274.96,439.37,629.29],"silhouette":"M226.77,629.29 L155.91,558.43 L297.64,416.69 L155.91,416.69 L297.64,274.96 L439.37,416.69 L439.37,558.43 L297.64,558.43 L368.50,629.29Z"},{"deck":"new","n":5,"name":"새로운 모양 05","pieces":[{"type":"large","x":333.071,"y":369.449,"a":0,"color":"#F19C9C"},{"type":"medium","x":427.559,"y":322.205,"a":0,"color":"#76B7E9"},{"type":"small","x":191.339,"y":369.449,"a":270,"color":"#FFD96A"},{"type":"large","x":167.717,"y":487.559,"a":90,"color":"#FFB973"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M120.47,629.29 L120.47,345.83 L262.20,345.83 L333.07,274.96 L474.80,274.96 L474.80,416.69 L191.34,416.69 L262.20,487.56Z"},{"deck":"new","n":6,"name":"새로운 모양 06","pieces":[{"type":"large","x":262.205,"y":440.315,"a":0,"color":"#F19C9C"},{"type":"medium","x":167.717,"y":393.071,"a":270,"color":"#76B7E9"},{"type":"small","x":403.937,"y":440.315,"a":270,"color":"#FFD96A"},{"type":"para","x":368.504,"y":522.992,"a":0,"color":"#B99AE6"}],"bounds":[120.47,345.83,474.8,558.43],"silhouette":"M333.07,558.43 L262.20,487.56 L120.47,487.56 L120.47,345.83 L262.20,345.83 L333.07,416.69 L474.80,416.69 L403.94,487.56 L474.80,558.43Z"},{"deck":"new","n":7,"name":"새로운 모양 07","pieces":[{"type":"large","x":262.205,"y":404.882,"a":0,"color":"#F19C9C"},{"type":"large","x":262.205,"y":499.37,"a":180,"color":"#FFB973"},{"type":"para","x":368.504,"y":345.827,"a":0,"color":"#B99AE6"},{"type":"small","x":380.315,"y":522.992,"a":0,"color":"#FFD96A"}],"bounds":[120.47,310.39,474.8,593.86],"silhouette":"M120.47,452.13 L262.20,310.39 L403.94,310.39 L474.80,381.26 L333.07,381.26 L403.94,452.13 L403.94,593.86 L333.07,522.99 L262.20,593.86Z"},{"deck":"new","n":8,"name":"새로운 모양 08","pieces":[{"type":"large","x":347.748,"y":546.614,"a":0,"color":"#F19C9C"},{"type":"large","x":253.26,"y":452.126,"a":90,"color":"#FFB973"},{"type":"square","x":155.905,"y":543.748,"a":0,"color":"#77D5AE"},{"type":"small","x":182.393,"y":422.773,"a":0,"color":"#FFD96A"}],"bounds":[105.8,310.39,489.48,593.86],"silhouette":"M206.02,493.64 L135.15,422.77 L206.02,351.91 L206.02,310.39 L347.75,452.13 L489.48,593.86 L206.02,593.86 L105.80,593.86 L105.80,493.64Z"},{"deck":"new","n":9,"name":"새로운 모양 09","pieces":[{"type":"large","x":262.205,"y":404.882,"a":0,"color":"#F19C9C"},{"type":"small","x":191.339,"y":334.016,"a":270,"color":"#FFD96A"},{"type":"para","x":368.504,"y":487.559,"a":0,"color":"#B99AE6"},{"type":"medium","x":214.961,"y":499.37,"a":0,"color":"#76B7E9"},{"type":"small","x":403.937,"y":546.614,"a":270,"color":"#F2A0C1"}],"bounds":[120.47,310.39,474.8,593.86],"silhouette":"M333.07,522.99 L262.20,452.13 L262.20,593.86 L120.47,452.13 L191.34,381.26 L120.47,310.39 L262.20,310.39 L403.94,452.13 L474.80,522.99 L403.94,593.86Z"},{"deck":"new","n":10,"name":"새로운 모양 10","pieces":[{"type":"large","x":297.638,"y":475.748,"a":0,"color":"#F19C9C"},{"type":"medium","x":392.126,"y":570.236,"a":0,"color":"#76B7E9"},{"type":"large","x":392.126,"y":381.26,"a":270,"color":"#FFB973"},{"type":"square","x":297.638,"y":593.858,"a":45,"color":"#77D5AE"},{"type":"small","x":226.772,"y":546.614,"a":270,"color":"#FFD96A"}],"bounds":[155.91,239.53,439.37,664.72],"silhouette":"M439.37,664.72 L368.50,593.86 L297.64,664.72 L226.77,593.86 L155.91,522.99 L297.64,381.26 L439.37,239.53 L439.37,522.99Z"},{"deck":"new","n":11,"name":"새로운 모양 11","pieces":[{"type":"large","x":247.528,"y":511.181,"a":0,"color":"#F19C9C"},{"type":"small","x":365.638,"y":487.559,"a":0,"color":"#FFD96A"},{"type":"square","x":439.37,"y":508.315,"a":0,"color":"#77D5AE"},{"type":"para","x":141.229,"y":452.126,"a":90,"color":"#B99AE6"},{"type":"small","x":318.394,"y":440.315,"a":270,"color":"#F2A0C1"}],"bounds":[105.8,345.83,489.48,558.43],"silhouette":"M489.48,458.21 L489.48,558.43 L389.26,558.43 L105.80,558.43 L105.80,416.69 L176.66,345.83 L176.66,487.56 L247.53,416.69 L389.26,416.69 L389.26,458.21Z"},{"deck":"new","n":12,"name":"새로운 모양 12","pieces":[{"type":"large","x":247.528,"y":546.614,"a":0,"color":"#F19C9C"},{"type":"para","x":353.827,"y":487.559,"a":0,"color":"#B99AE6"},{"type":"small","x":389.26,"y":546.614,"a":270,"color":"#FFD96A"},{"type":"medium","x":342.016,"y":404.882,"a":90,"color":"#76B7E9"},{"type":"square","x":439.37,"y":360.504,"a":0,"color":"#77D5AE"}],"bounds":[105.8,310.39,489.48,593.86],"silhouette":"M389.26,593.86 L105.80,593.86 L247.53,452.13 L389.26,310.39 L489.48,310.39 L489.48,410.61 L389.26,410.61 L389.26,452.13 L460.13,522.99Z"},{"deck":"new","n":13,"name":"새로운 모양 13","pieces":[{"type":"large","x":297.638,"y":546.614,"a":0,"color":"#F19C9C"},{"type":"large","x":203.15,"y":452.126,"a":90,"color":"#FFB973"},{"type":"para","x":262.205,"y":345.827,"a":0,"color":"#B99AE6"},{"type":"small","x":415.748,"y":522.992,"a":0,"color":"#FFD96A"},{"type":"small","x":368.504,"y":475.748,"a":270,"color":"#F2A0C1"}],"bounds":[155.91,310.39,439.37,593.86],"silhouette":"M439.37,593.86 L155.91,593.86 L155.91,310.39 L297.64,310.39 L368.50,381.26 L226.77,381.26 L297.64,452.13 L439.37,452.13Z"},{"deck":"new","n":14,"name":"새로운 모양 14","pieces":[{"type":"large","x":297.638,"y":475.748,"a":0,"color":"#F19C9C"},{"type":"small","x":415.748,"y":452.126,"a":0,"color":"#FFD96A"},{"type":"small","x":226.772,"y":546.614,"a":270,"color":"#F2A0C1"},{"type":"square","x":297.638,"y":593.858,"a":45,"color":"#77D5AE"},{"type":"medium","x":203.15,"y":428.504,"a":270,"color":"#76B7E9"},{"type":"large","x":297.638,"y":334.016,"a":0,"color":"#FFB973"}],"bounds":[155.91,239.53,439.37,664.72],"silhouette":"M297.64,664.72 L226.77,593.86 L155.91,522.99 L155.91,381.26 L297.64,239.53 L439.37,381.26 L439.37,522.99 L297.64,522.99 L368.50,593.86Z M297.64,381.26 L368.50,452.13 L439.37,381.26Z"},{"deck":"new","n":15,"name":"새로운 모양 15","pieces":[{"type":"large","x":333.071,"y":369.449,"a":0,"color":"#F19C9C"},{"type":"large","x":333.071,"y":463.937,"a":180,"color":"#FFB973"},{"type":"medium","x":427.559,"y":322.205,"a":0,"color":"#76B7E9"},{"type":"para","x":226.772,"y":522.992,"a":0,"color":"#B99AE6"},{"type":"small","x":262.205,"y":582.047,"a":270,"color":"#FFD96A"},{"type":"small","x":333.071,"y":605.669,"a":90,"color":"#F2A0C1"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M120.47,487.56 L262.20,487.56 L191.34,416.69 L333.07,274.96 L474.80,274.96 L474.80,416.69 L333.07,558.43 L403.94,629.29 L262.20,629.29 L191.34,558.43Z"},{"deck":"new","n":16,"name":"새로운 모양 16","pieces":[{"type":"large","x":262.205,"y":440.315,"a":0,"color":"#F19C9C"},{"type":"medium","x":356.693,"y":534.803,"a":0,"color":"#76B7E9"},{"type":"square","x":403.937,"y":416.693,"a":45,"color":"#77D5AE"},{"type":"small","x":427.559,"y":558.425,"a":180,"color":"#FFD96A"},{"type":"large","x":333.071,"y":322.205,"a":180,"color":"#FFB973"},{"type":"small","x":451.181,"y":345.827,"a":0,"color":"#F2A0C1"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M120.47,487.56 L262.20,345.83 L191.34,274.96 L474.80,274.96 L474.80,416.69 L403.94,487.56 L474.80,558.43 L403.94,629.29 L262.20,487.56Z"},{"deck":"new","n":17,"name":"새로운 모양 17","pieces":[{"type":"large","x":333.071,"y":440.315,"a":0,"color":"#F19C9C"},{"type":"para","x":297.638,"y":522.992,"a":0,"color":"#B99AE6"},{"type":"small","x":262.205,"y":369.449,"a":270,"color":"#FFD96A"},{"type":"square","x":191.339,"y":558.425,"a":45,"color":"#77D5AE"},{"type":"small","x":403.937,"y":511.181,"a":270,"color":"#F2A0C1"},{"type":"large","x":167.717,"y":416.693,"a":90,"color":"#FFB973"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M403.94,558.43 L262.20,558.43 L191.34,629.29 L120.47,558.43 L120.47,274.96 L191.34,345.83 L333.07,345.83 L474.80,487.56Z"},{"deck":"new","n":18,"name":"새로운 모양 18","pieces":[{"type":"large","x":297.638,"y":440.315,"a":0,"color":"#F19C9C"},{"type":"medium","x":203.15,"y":534.803,"a":270,"color":"#76B7E9"},{"type":"large","x":297.638,"y":582.047,"a":0,"color":"#FFB973"},{"type":"square","x":368.504,"y":345.827,"a":45,"color":"#77D5AE"},{"type":"small","x":179.528,"y":416.693,"a":180,"color":"#FFD96A"},{"type":"small","x":415.748,"y":558.425,"a":0,"color":"#F2A0C1"}],"bounds":[155.91,274.96,439.37,629.29],"silhouette":"M439.37,629.29 L155.91,629.29 L155.91,487.56 L155.91,345.83 L226.77,416.69 L297.64,345.83 L368.50,274.96 L439.37,345.83 L368.50,416.69 L439.37,487.56Z M368.50,558.43 L439.37,487.56 L297.64,487.56Z"},{"deck":"new","n":19,"name":"새로운 모양 19","pieces":[{"type":"large","x":262.205,"y":369.449,"a":0,"color":"#F19C9C"},{"type":"para","x":368.504,"y":452.126,"a":0,"color":"#B99AE6"},{"type":"small","x":191.339,"y":440.315,"a":270,"color":"#FFD96A"},{"type":"large","x":167.717,"y":558.425,"a":90,"color":"#FFB973"},{"type":"medium","x":167.717,"y":322.205,"a":270,"color":"#76B7E9"},{"type":"small","x":451.181,"y":416.693,"a":0,"color":"#F2A0C1"},{"type":"square","x":333.071,"y":274.961,"a":45,"color":"#77D5AE"}],"bounds":[120.47,204.09,474.8,700.16],"silhouette":"M120.47,700.16 L120.47,416.69 L120.47,274.96 L262.20,274.96 L333.07,204.09 L403.94,274.96 L333.07,345.83 L403.94,416.69 L474.80,345.83 L474.80,487.56 L333.07,487.56 L262.20,416.69 L191.34,487.56 L262.20,558.43Z"},{"deck":"new","n":20,"name":"새로운 모양 20","pieces":[{"type":"large","x":333.071,"y":440.315,"a":0,"color":"#F19C9C"},{"type":"large","x":333.071,"y":534.803,"a":180,"color":"#FFB973"},{"type":"small","x":191.339,"y":534.803,"a":90,"color":"#FFD96A"},{"type":"small","x":191.339,"y":582.047,"a":270,"color":"#F2A0C1"},{"type":"para","x":155.905,"y":452.126,"a":90,"color":"#B99AE6"},{"type":"medium","x":427.559,"y":582.047,"a":90,"color":"#76B7E9"},{"type":"square","x":262.205,"y":345.827,"a":45,"color":"#77D5AE"}],"bounds":[120.47,274.96,474.8,629.29],"silhouette":"M120.47,558.43 L120.47,416.69 L191.34,345.83 L262.20,274.96 L333.07,345.83 L474.80,487.56 L474.80,629.29 L333.07,629.29 L262.20,558.43 L191.34,629.29Z M191.34,487.56 L262.20,416.69 L191.34,345.83Z"}]};
+const SVG='http://www.w3.org/2000/svg';
+const game=document.getElementById('game');
+const levelSelect=document.getElementById('levelSelect');
+const success=document.getElementById('success');
+const progress=document.getElementById('progress');
+const status=document.getElementById('status');
+const statusIcon=document.getElementById('statusIcon');
+let deck='new',levelIndex=0,hint='lines',auto=true;
+let items=[],slots=[],selected=-1,drag=null,slotScale=1,complete=false,toastText='';
+const PTYPE={large:'큰 세모',medium:'중간 세모',small:'작은 세모',square:'네모',para:'평행사변형'};
+const keepNoEvent=(s)=>String(s).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const currentLevel=()=>DATA.levels.filter(l=>l.deck===deck)[levelIndex];
+const levelsInDeck=()=>DATA.levels.filter(l=>l.deck===deck);
+const rad=a=>a*Math.PI/180;
+const dist=(x,y,a,b)=>Math.hypot(x-a,y-b);
+const angleDist=(a,b)=>Math.abs((((a-b)%360)+540)%360-180);
+const basePoints=type=>DATA.bases[(deck==='new'&&type==='para')?'new:para':type];
+const ptString=pts=>pts.map(p=>p.map(n=>n.toFixed(2)).join(',')).join(' ');
+function levelHint(){return 'lines'}
+function screenToSVG(ev){const p=game.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(game.getScreenCTM().inverse())}
+function coords(p){const a=rad(p.a),c=Math.cos(a),s=Math.sin(a);return basePoints(p.type).map(([u,v])=>[p.x+slotScale*(u*c-v*s),p.y+slotScale*(u*s+v*c)])}
+function makeSlotData(l){const [x0,y0,x1,y1]=l.bounds;slotScale=Math.min(1.52,680/(x1-x0),560/(y1-y0));const cx=(x0+x1)/2,cy=(y0+y1)/2;slots=l.pieces.map((p,i)=>({...p,index:i,x:445+(p.x-cx)*slotScale,y:369+(p.y-cy)*slotScale,origX:p.x,origY:p.y}));return {cx,cy}}
+let sceneCenter={cx:297,cy:440};
+function setupLevel(resetHint=true){
+ const l=currentLevel();sceneCenter=makeSlotData(l);
+ items=l.pieces.map((p,i)=>({id:i,type:p.type,color:p.color,a:0,x:0,y:0,location:'tray',slot:-1}));
+ selected=-1;complete=false;drag=null;if(resetHint)hint=levelHint();
+ levelSelect.innerHTML=levelsInDeck().map((v,i)=>`<option value="${i}" ${i===levelIndex?'selected':''}>${String(i+1).padStart(2,'0')}번 모양 · ${v.pieces.length}조각</option>`).join('');
+ updateControlState();setStatus('오른쪽 조각을 터치해 보세요.','✋');render();
+}
+function setStatus(t,ico='✋'){toastText=t;status.textContent=t;statusIcon.textContent=ico}
+function updateControlState(){
+ document.querySelectorAll('[data-deck]').forEach(b=>b.classList.toggle('active',b.dataset.deck===deck));
+ document.querySelectorAll('[data-hint]').forEach(b=>b.classList.toggle('active',b.dataset.hint===hint));
+ document.getElementById('rotateL').disabled=selected<0;
+ document.getElementById('rotateR').disabled=selected<0;
+ document.getElementById('putBackBtn').disabled=selected<0;
+ document.getElementById('prevBtn').disabled=levelIndex===0;
+ document.getElementById('nextBtn').disabled=levelIndex===levelsInDeck().length-1;
+ document.getElementById('successNext').disabled=levelIndex===levelsInDeck().length-1;
+ document.getElementById('auto').checked=auto;
+ progress.textContent=`${items.filter(p=>p.slot>=0).length} / ${items.length}`;
+ success.style.display=complete?'block':'none';
+}
+function geomTransform(p){return `translate(${p.x.toFixed(2)},${p.y.toFixed(2)}) rotate(${p.a}) scale(${slotScale.toFixed(4)})`}
+function drawTarget(p){
+ const cp=basePoints(p.type),poly=ptString(cp);
+ const hit=`<polygon data-target="${p.index}" points="${poly}" transform="${geomTransform(p)}" fill="transparent" stroke="transparent" stroke-width="8"/>`;
+ if(hint==='shadow')return hit;
+ const fill=hint==='color'?p.color:'#eff4f8';
+ const alpha=hint==='color'?'0.58':'1';
+ const stroke=hint==='color'?'#7894a9':'#728a9d';
+ const occ=items.some(it=>it.slot===p.index);
+ const visible=occ?`<polygon points="${poly}" transform="${geomTransform(p)}" fill="none" stroke="#d7e3ec" stroke-width="2" opacity=".16" pointer-events="none"/>`:
+ `<polygon points="${poly}" transform="${geomTransform(p)}" fill="${fill}" fill-opacity="${alpha}" stroke="${stroke}" stroke-width="2.6" stroke-linejoin="round" pointer-events="none"/>`;
+ return visible+hit;
+}
+function drawPiece(it){
+ const poly=ptString(basePoints(it.type));
+ const transform=geomTransform(it);
+ const sel=it.id===selected;
+ return `<g data-piece="${it.id}" transform="${transform}" style="filter:drop-shadow(0px 5px 4px #213d5533)">
+  <polygon points="${poly}" fill="${it.color}" stroke="${sel?'#1c57d9':'#39586e'}" stroke-width="${sel?5:2.4}" stroke-linejoin="round"/>
+  <polygon points="${poly}" fill="transparent" stroke="transparent" stroke-width="15"/>
+ </g>`;
+}
+function trayPiece(it,i){
+ const row=Math.floor(i/2),col=i%2,x=933+col*119,y=135+row*137,w=110,h=123;
+ const used=it.slot>=0,loose=it.location==='free',isSel=selected===i;
+ const pp=basePoints(it.type),bx=Math.max(...pp.map(p=>p[0]))-Math.min(...pp.map(p=>p[0])),by=Math.max(...pp.map(p=>p[1]))-Math.min(...pp.map(p=>p[1]));
+ const prevS=Math.min(.85,94/bx,78/by);
+ const tileFill=isSel?'#e0edff':used?'#e0f4e9':'#fff';
+ const tileStroke=isSel?'#2b63c7':used?'#a9d7b7':'#d4e1ed';
+ const annotation=used?'✓ 놓았어요':loose?'↗ 옮기는 중':PTYPE[it.type];
+ return `<g data-tray="${i}">
+ <rect x="${x}" y="${y}" rx="15" width="${w}" height="${h}" fill="${tileFill}" stroke="${tileStroke}" stroke-width="${isSel?3:1.7}"/>
+ <g transform="translate(${x+w/2},${y+54}) rotate(${it.a}) scale(${prevS.toFixed(3)})" opacity="${used?.48:1}">
+  <polygon points="${ptString(pp)}" fill="${it.color}" stroke="#38536b" stroke-width="3.5" stroke-linejoin="round"/>
+ </g>
+ <text x="${x+w/2}" y="${y+108}" text-anchor="middle" font-size="13" font-weight="850" fill="${used?'#538169':'#49617a'}">${annotation}</text>
+ </g>`;
+}
+function render(){
+ const l=currentLevel();
+ const silT=`translate(445,369) scale(${slotScale.toFixed(5)}) translate(${-sceneCenter.cx},${-sceneCenter.cy})`;
+ const stage=`<rect x="14" y="20" width="882" height="702" rx="25" fill="white" stroke="#e0eaf4" stroke-width="2"/>
+ <rect x="919" y="20" width="267" height="702" rx="25" fill="#e9f1fb" stroke="#d8e6f4" stroke-width="2"/>
+ <text x="45" y="73" font-size="26" font-weight="900" fill="#193852">${keepNoEvent(l.name)}</text>
+ <text x="45" y="104" font-size="17" font-weight="750" fill="#7690a4">${l.pieces.length}조각 · PDF ${levelIndex*2+1}~${levelIndex*2+2}쪽</text>
+ <text x="1052" y="73" text-anchor="middle" font-size="24" font-weight="900" fill="#254467">조각 바구니</text>
+ <text x="1052" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="#677f98">손으로 끌거나 터치해요</text>
+ <text x="48" y="689" font-size="16" fill="#9bafc2" font-weight="740">${hint==='shadow'?'겉모양을 보고 맞춰요':hint==='color'?'같은 색깔과 모양을 찾아요':'같은 모양을 찾아요'}</text>`;
+ const silhouette=`<path d="${l.silhouette}" transform="${silT}" fill="#dae6ee" stroke="#708b9d" stroke-width="2.5" stroke-linejoin="round" fill-rule="evenodd" pointer-events="none"/>`;
+ const targetStr=slots.map(drawTarget).join('');
+ const piecesOnStage=items.filter(it=>it.location!=='tray').map(drawPiece).join('');
+ const tiles=items.map(trayPiece).join('');
+ game.innerHTML=stage+`<g>${silhouette}</g>`+targetStr+piecesOnStage+tiles;
+ updateControlState();
+}
+function availableSlot(item,point,maxdist=110){
+ let candidates=slots.filter(s=>s.type===item.type&&!items.some(z=>z.slot===s.index));
+ if(hint==='color')candidates=candidates.filter(s=>s.color.toLowerCase()===item.color.toLowerCase());
+ candidates=candidates.map(s=>({s,d:dist(point.x,point.y,s.x,s.y)})).sort((a,b)=>a.d-b.d);
+ return candidates.length&&candidates[0].d<maxdist?candidates[0].s:null;
+}
+function placePiece(i,slot,forceAuto=auto){
+ if(i<0||!slot)return false;
+ const it=items[i];if(it.type!==slot.type)return false;
+ if(hint==='color'&&slot.color.toLowerCase()!==it.color.toLowerCase())return false;
+ if(items.some(z=>z.slot===slot.index&&z.id!==i))return false;
+ if(!forceAuto&&angleDist(it.a,slot.a)>7){setStatus('방향이 달라요. ↶ ↷ 버튼으로 돌려 보세요.','↻');render();return false}
+ it.x=slot.x;it.y=slot.y;it.a=slot.a;it.slot=slot.index;it.location='placed';selected=-1;
+ const placed=items.filter(p=>p.slot>=0).length;
+ if(placed===items.length){complete=true;setStatus('모양을 완성했어요!','⭐');}
+ else{setStatus(`좋아요! ${placed}조각을 놓았어요.`,'✅')}
+ render();return true;
+}
+function selectPiece(i){
+ if(i<0||!items[i])return;
+ const p=items[i];
+ if(p.slot>=0){p.slot=-1;p.location='free';}
+ selected=i;complete=false;
+ setStatus(`${PTYPE[p.type]} 선택! 모양 자리로 가져가세요.`,'👆');render();
+}
+function changeLevel(to){const ls=levelsInDeck();if(to<0||to>=ls.length)return;levelIndex=to;setupLevel(true)}
+function switchDeck(d){deck=d;levelIndex=0;setupLevel(true)}
+function rotatePiece(step){if(selected<0)return;const p=items[selected];p.a=((p.a+step+360)%360);setStatus(`${PTYPE[p.type]} 방향을 돌렸어요.`,'↻');render()}
+function onDown(ev){
+ if(ev.button!==undefined&&ev.button!==0)return;
+ const pos=screenToSVG(ev);
+ const tray=ev.target.closest('[data-tray]');
+ const piece=ev.target.closest('[data-piece]');
+ const tar=ev.target.closest('[data-target]');
+ if(piece){
+   const idx=+piece.dataset.piece;selectPiece(idx);
+   drag={i:idx,start:pos,dx:pos.x-items[idx].x,dy:pos.y-items[idx].y,moved:false,source:'board'};
+   game.setPointerCapture(ev.pointerId);ev.preventDefault();return;
+ }
+ if(tray){
+   const idx=+tray.dataset.tray;const it=items[idx];
+   if(it.slot>=0){setStatus('놓은 조각을 다시 옮기려면 왼쪽 조각을 터치하세요.','✅');return}
+   selectPiece(idx);
+   drag={i:idx,start:pos,dx:0,dy:0,moved:false,source:'tray'};
+   game.setPointerCapture(ev.pointerId);ev.preventDefault();return;
+ }
+ if(tar&&selected>=0){
+   placePiece(selected,slots[+tar.dataset.target]);ev.preventDefault();return;
+ }
+ if(selected>=0&&pos.x<895&&pos.x>14){
+   const s=availableSlot(items[selected],pos,200);
+   if(s)placePiece(selected,s);
+ }
+}
+function onMove(ev){if(!drag)return;const pos=screenToSVG(ev);if(!drag.moved&&dist(pos.x,pos.y,drag.start.x,drag.start.y)<9)return;drag.moved=true;const p=items[drag.i];p.location='free';p.slot=-1;complete=false;p.x=pos.x-drag.dx;p.y=pos.y-drag.dy;render();}
+function onUp(ev){if(!drag)return;const d=drag;drag=null;
+ if(!d.moved)return;
+ const p=items[d.i];const slot=availableSlot(p,{x:p.x,y:p.y},124);
+ if(slot){if(!placePiece(d.i,slot)){setStatus('방향을 바꾸거나 모양 자리에 다시 놓아 보세요.','↻');render()}}
+ else{setStatus('조각을 옮겼어요. 같은 모양을 찾아보세요.','👆');render()}
+ try{if(game.hasPointerCapture(ev.pointerId))game.releasePointerCapture(ev.pointerId)}catch(_){ }
+}
+game.addEventListener('pointerdown',onDown);
+game.addEventListener('pointermove',onMove);
+game.addEventListener('pointerup',onUp);
+game.addEventListener('pointercancel',onUp);
+document.querySelectorAll('[data-deck]').forEach(b=>b.addEventListener('click',()=>switchDeck(b.dataset.deck)));
+document.querySelectorAll('[data-hint]').forEach(b=>b.addEventListener('click',()=>{hint=b.dataset.hint;render()}));
+levelSelect.addEventListener('change',ev=>changeLevel(+ev.target.value));
+document.getElementById('auto').addEventListener('change',ev=>{auto=ev.target.checked;render()});
+document.getElementById('rotateL').addEventListener('click',()=>rotatePiece(-45));
+document.getElementById('rotateR').addEventListener('click',()=>rotatePiece(45));
+document.getElementById('putBackBtn').addEventListener('click',()=>{if(selected<0)return;const p=items[selected];p.slot=-1;p.location='tray';p.a=0;p.x=0;p.y=0;selected=-1;complete=false;setStatus('조각을 바구니로 돌려놓았어요.','✋');render()});
+document.getElementById('resetBtn').addEventListener('click',()=>setupLevel(false));
+document.getElementById('prevBtn').addEventListener('click',()=>changeLevel(levelIndex-1));
+document.getElementById('nextBtn').addEventListener('click',()=>changeLevel(levelIndex+1));
+document.getElementById('successNext').addEventListener('click',()=>changeLevel(levelIndex+1));
+document.getElementById('fullscreenBtn').addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){setStatus('전체 화면 버튼을 사용할 수 없는 환경입니다.','ⓘ')}});
+const help=document.getElementById('help');document.getElementById('helpBtn').addEventListener('click',()=>help.showModal());document.getElementById('helpClose').addEventListener('click',()=>help.close());
+document.addEventListener('keydown',ev=>{if(ev.target===levelSelect||help.open)return;if(ev.key==='ArrowLeft'&&selected>=0){rotatePiece(-45);ev.preventDefault()}if(ev.key==='ArrowRight'&&selected>=0){rotatePiece(45);ev.preventDefault()}if(ev.key==='Escape'){if(selected>=0){selected=-1;render()}}});
+setupLevel(true);
+</script>
+</body>
+</html>
