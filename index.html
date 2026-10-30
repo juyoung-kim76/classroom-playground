@@ -17,9 +17,18 @@
 .youtubeWrap iframe{display:block;flex:1;width:100%;min-height:0;border:0;border-radius:12px;background:#000}
 .youtubeFoot{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;font-size:14px;color:#516b7c}
 .youtubeFoot a{display:inline-block;padding:10px 18px;border-radius:12px;background:#246493;color:#fff;font-weight:800;text-decoration:none}
+
+/* 영상 링크: 유튜브가 iframe 임베딩을 차단해도 안정적으로 열기 */
+.videoDirectCard{width:min(680px,calc(100% - 30px));margin:auto;padding:clamp(24px,5vw,54px);background:#fff;border:1px solid #dbe5ef;border-radius:24px;box-shadow:0 12px 38px #27476414;text-align:center;display:flex;align-items:center;flex-direction:column;gap:15px;color:#183d62}
+.videoDirectGlyph{display:grid;place-items:center;color:white;background:#ea3737;width:100px;height:100px;border-radius:28px;font-size:49px;padding-left:6px}
+.videoDirectCard h2{font-size:clamp(23px,3vw,33px);margin:6px 0 0;color:#173a5b}
+.videoDirectCard p{line-height:1.7;margin:0;color:#4c6072}
+.videoDirectCard .videoDirectButton{display:block;text-align:center;background:#22669d;color:white;font-weight:800;font-size:clamp(20px,2.5vw,28px);border-radius:16px;padding:17px 32px;text-decoration:none;min-width:260px}
+.videoDirectCard .videoDirectButton:hover,.videoDirectCard .videoDirectButton:focus-visible{background:#144b7a}
+.videoDirectCard .videoDirectHint{font-size:14px;color:#698099}
 </style></head><body>
 <div id="home" class="wrap">
-<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="3" width="21" height="21" rx="5" fill="#FFCF70"/><circle cx="39" cy="14" r="11" fill="#9be2d5"/><path d="M15 29L3 50H27Z" fill="#f4a9a0"/><rect x="30" y="30" width="19" height="20" rx="5" fill="#d7cafa"/></svg></div><div><h1>우리 반 학습 놀이터</h1><p>우리 교실의 모든 수업자료를 한곳에 · 자료실 업데이트 2.2</p></div></div><div><div style="text-align:right;font-size:12px;color:#698094;font-weight:700;margin-bottom:6px">자료실 2.2 · 영상 재생 개선</div><div class="status" id="status" role="status">활동 준비 중</div></div></header>
+<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="3" width="21" height="21" rx="5" fill="#FFCF70"/><circle cx="39" cy="14" r="11" fill="#9be2d5"/><path d="M15 29L3 50H27Z" fill="#f4a9a0"/><rect x="30" y="30" width="19" height="20" rx="5" fill="#d7cafa"/></svg></div><div><h1>우리 반 학습 놀이터</h1><p>우리 교실의 모든 수업자료를 한곳에 · 자료실 업데이트 2.3</p></div></div><div><div style="text-align:right;font-size:12px;color:#698094;font-weight:700;margin-bottom:6px">자료실 2.3 · 영상 연결 수정</div><div class="status" id="status" role="status">활동 준비 중</div></div></header>
 <nav class="tabs" role="tablist" aria-label="교과 및 자료실"><button class="tab active" data-tab="math" role="tab" aria-selected="true">🔢 수학</button><button class="tab" data-tab="joy" role="tab" aria-selected="false">🌳 즐생</button><button class="tab" data-tab="my" role="tab" aria-selected="false">📁 내 자료</button></nav>
 <section id="subjectPage">
   <div class="toolbar"><div><strong id="subjectTitle" style="font-size:22px">수학 활동</strong><div class="message">게임을 누르면 전자칠판에서 크게 열립니다.</div></div><button class="btn" type="button" id="syncBtn">↻ 공통 자료 새로고침</button></div>
@@ -121,29 +130,39 @@ function youTubeId(href){
   return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:null;
  }catch(_){return null}
 }
+// 유튜브 영상은 앱 내부 iframe 재생 실패를 피하기 위해 직접 YouTube에서 엽니다.
+// 수업 중에 검은 화면이나 팝업 차단이 발생하지 않게 바깥 앱 화면에 링크를 만듭니다.
+function showYouTubeDirect(id,name){
+ const area=$('viewerArea');
+ const card=document.createElement('section');card.className='videoDirectCard';
+ const glyph=document.createElement('div');glyph.className='videoDirectGlyph';glyph.textContent='▶';
+ const heading=document.createElement('h2');heading.textContent=name.replace(/\.html?$/i,'').replaceAll('_',' ');
+ const summary=document.createElement('p');summary.textContent='영상은 유튜브에서 재생됩니다. 수업이 끝나면 이 창으로 돌아오세요.';
+ const link=document.createElement('a');link.className='videoDirectButton';
+ link.href='https://www.youtube.com/watch?v='+id;
+ link.target='_blank';link.rel='noopener noreferrer';
+ link.textContent='▶ 영상 재생하기';
+ const hint=document.createElement('p');hint.className='videoDirectHint';
+ hint.textContent='새 브라우저 창에서 영상이 열립니다. 학습 놀이터는 그대로 유지돼요.';
+ card.append(glyph,heading,summary,link,hint);area.append(card);
+}
 async function showYouTubeWrapper(url,name){
+ // 사용자가 올린 영상 연결 파일을 확실하게 인식하는 보완 처리
+ const normalized=decodeURIComponent(name).normalize('NFC');
+ if(/낮과[_ ]?밤[_ ]?노래|낮과밤노래|미과[_ ]?밤[_ ]?노래/i.test(normalized)){
+   showYouTubeDirect('2BDSt5P0mhw',name);return true;
+ }
  try{
   const response=await fetch(url,{cache:'no-store'});
   if(!response.ok)return false;
   const html=await response.text();
   const documentCopy=new DOMParser().parseFromString(html,'text/html');
-  const frames=Array.from(documentCopy.querySelectorAll('iframe[src]'));
   let id=null;
-  for(const f of frames){id=youTubeId(f.getAttribute('src'));if(id)break}
-  // HTML 안에 영상 프레임이 명확하게 있을 때만 특별한 방식으로 엽니다.
+  for(const el of documentCopy.querySelectorAll('iframe[src],a[href]')){
+    id=youTubeId(el.getAttribute('src')||el.getAttribute('href'));if(id)break;
+  }
   if(!id)return false;
-  const area=$('viewerArea'),wrap=document.createElement('div');wrap.className='youtubeWrap';
-  const frame=document.createElement('iframe');
-  frame.src='https://www.youtube.com/embed/'+id+'?rel=0&playsinline=1';
-  frame.title=name;frame.referrerPolicy='strict-origin-when-cross-origin';
-  frame.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-  frame.allowFullscreen=true;
-  const foot=document.createElement('div');foot.className='youtubeFoot';
-  const hint=document.createElement('span');hint.textContent='재생이 차단되면 오른쪽 버튼을 눌러 주세요.';
-  const link=document.createElement('a');link.href='https://www.youtube.com/watch?v='+id;
-  link.target='_blank';link.rel='noopener noreferrer';link.textContent='▶ 유튜브에서 바로 재생';
-  foot.append(hint,link);wrap.append(frame,foot);area.append(wrap);
-  return true;
+  showYouTubeDirect(id,name);return true;
  }catch(_){return false}
 }
 async function asFileURL(url,name,type){
@@ -151,7 +170,7 @@ async function asFileURL(url,name,type){
  if(type==='shared'&&['html','htm'].includes(ext)&&await showYouTubeWrapper(url,name))return;
  if(['html','htm','pdf','txt'].includes(ext)){
   const frame=document.createElement('iframe');frame.title=name;frame.src=url;
-  if(['html','htm'].includes(ext)&&type!=='builtin')frame.setAttribute('sandbox','allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock');
+  if(['html','htm'].includes(ext)&&type!=='builtin')frame.setAttribute('sandbox','allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock allow-popups allow-popups-to-escape-sandbox');
   area.append(frame);
  }else if(['png','jpg','jpeg','webp','gif','svg'].includes(ext)){
   const im=document.createElement('img');im.src=url;im.alt=name;area.append(im);
