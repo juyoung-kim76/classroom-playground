@@ -11,9 +11,15 @@
 .panel{background:white;border-radius:19px;border:2px solid #e3ebf1;padding:19px;margin:14px 0}.panel h2{font-size:22px;color:#244c70;margin:0 0 10px}.panel p{color:#61798d;line-height:1.65;margin:0 0 12px}.formrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.select{padding:13px;border-radius:12px;border:2px solid #d1e0ea;background:white;min-height:48px}.subtle{font-size:13px;color:#7b8e9e}.hide{display:none!important}
 .viewer{position:fixed;inset:0;z-index:20;background:white;display:flex;flex-direction:column}.viewerbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 16px;background:#f1f6f9;border-bottom:1px solid #d7e5ed;min-height:62px}.viewerbar strong{font-size:19px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.viewerbar .btn{padding:9px 13px}.viewerarea{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;background:#e7eef3;position:relative}.viewerarea iframe{width:100%;height:100%;border:0;background:#fff}.viewerarea img{max-width:100%;max-height:100%;object-fit:contain}.viewerarea video{max-width:100%;max-height:100%}.viewerarea audio{width:min(500px,90%)}.fallback{background:#fff;padding:25px;border-radius:18px;max-width:510px;text-align:center;line-height:1.8}.vieweraction{margin-top:14px}
 @media(max-width:880px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:17px}}@media(max-width:620px){.cards{grid-template-columns:1fr}.brand h1{font-size:22px}.brand p{display:none}.logo{width:45px;height:45px}.logo svg{width:32px}.status{font-size:11px}.tab{font-size:17px}.card{min-height:104px}.viewerbar strong{font-size:14px}.viewerbar .btn{padding:8px}}
+
+/* 공통 HTML 속 YouTube 영상을 이중 창 없이 바로 보여주는 뷰어 */
+.youtubeWrap{width:100%;height:100%;padding:12px;display:flex;flex-direction:column;gap:9px;align-items:stretch}
+.youtubeWrap iframe{display:block;flex:1;width:100%;min-height:0;border:0;border-radius:12px;background:#000}
+.youtubeFoot{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;font-size:14px;color:#516b7c}
+.youtubeFoot a{display:inline-block;padding:10px 18px;border-radius:12px;background:#246493;color:#fff;font-weight:800;text-decoration:none}
 </style></head><body>
 <div id="home" class="wrap">
-<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="3" width="21" height="21" rx="5" fill="#FFCF70"/><circle cx="39" cy="14" r="11" fill="#9be2d5"/><path d="M15 29L3 50H27Z" fill="#f4a9a0"/><rect x="30" y="30" width="19" height="20" rx="5" fill="#d7cafa"/></svg></div><div><h1>우리 반 학습 놀이터</h1><p>우리 교실의 모든 수업자료를 한곳에 · 자료실 업데이트 2.1</p></div></div><div><div style="text-align:right;font-size:12px;color:#698094;font-weight:700;margin-bottom:6px">자료실 2.1 · 10월 30일 수정판</div><div class="status" id="status" role="status">활동 준비 중</div></div></header>
+<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="3" width="21" height="21" rx="5" fill="#FFCF70"/><circle cx="39" cy="14" r="11" fill="#9be2d5"/><path d="M15 29L3 50H27Z" fill="#f4a9a0"/><rect x="30" y="30" width="19" height="20" rx="5" fill="#d7cafa"/></svg></div><div><h1>우리 반 학습 놀이터</h1><p>우리 교실의 모든 수업자료를 한곳에 · 자료실 업데이트 2.2</p></div></div><div><div style="text-align:right;font-size:12px;color:#698094;font-weight:700;margin-bottom:6px">자료실 2.2 · 영상 재생 개선</div><div class="status" id="status" role="status">활동 준비 중</div></div></header>
 <nav class="tabs" role="tablist" aria-label="교과 및 자료실"><button class="tab active" data-tab="math" role="tab" aria-selected="true">🔢 수학</button><button class="tab" data-tab="joy" role="tab" aria-selected="false">🌳 즐생</button><button class="tab" data-tab="my" role="tab" aria-selected="false">📁 내 자료</button></nav>
 <section id="subjectPage">
   <div class="toolbar"><div><strong id="subjectTitle" style="font-size:22px">수학 활동</strong><div class="message">게임을 누르면 전자칠판에서 크게 열립니다.</div></div><button class="btn" type="button" id="syncBtn">↻ 공통 자료 새로고침</button></div>
@@ -102,8 +108,47 @@ async function syncShared(manual=false){
 }
 function openViewer(title){$('home').classList.add('hide');$('viewer').classList.remove('hide');$('viewTitle').textContent=title;const v=$('viewerArea');v.replaceChildren();window.scrollTo(0,0)}
 function closeViewer(){if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});$('viewerArea').replaceChildren();$('viewer').classList.add('hide');$('home').classList.remove('hide');if(viewURL){URL.revokeObjectURL(viewURL);viewURL=null}}
-function asFileURL(url,name,type){
+// HTML 파일 안의 유튜브 영상만 확인합니다. 파일에 들어 있는 코드를 실행하지 않습니다.
+function youTubeId(href){
+ try{
+  const u=new URL(href,location.href),host=u.hostname.toLowerCase();
+  let id='';
+  if(['www.youtube.com','youtube.com','m.youtube.com','www.youtube-nocookie.com','youtube-nocookie.com'].includes(host)){
+   if(u.pathname.startsWith('/embed/'))id=u.pathname.split('/')[2]||'';
+   else if(u.pathname==='/watch')id=u.searchParams.get('v')||'';
+   else if(u.pathname.startsWith('/shorts/'))id=u.pathname.split('/')[2]||'';
+  }else if(host==='youtu.be'||host==='www.youtu.be')id=u.pathname.slice(1).split('/')[0];
+  return /^[a-zA-Z0-9_-]{11}$/.test(id)?id:null;
+ }catch(_){return null}
+}
+async function showYouTubeWrapper(url,name){
+ try{
+  const response=await fetch(url,{cache:'no-store'});
+  if(!response.ok)return false;
+  const html=await response.text();
+  const documentCopy=new DOMParser().parseFromString(html,'text/html');
+  const frames=Array.from(documentCopy.querySelectorAll('iframe[src]'));
+  let id=null;
+  for(const f of frames){id=youTubeId(f.getAttribute('src'));if(id)break}
+  // HTML 안에 영상 프레임이 명확하게 있을 때만 특별한 방식으로 엽니다.
+  if(!id)return false;
+  const area=$('viewerArea'),wrap=document.createElement('div');wrap.className='youtubeWrap';
+  const frame=document.createElement('iframe');
+  frame.src='https://www.youtube.com/embed/'+id+'?rel=0&playsinline=1';
+  frame.title=name;frame.referrerPolicy='strict-origin-when-cross-origin';
+  frame.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+  frame.allowFullscreen=true;
+  const foot=document.createElement('div');foot.className='youtubeFoot';
+  const hint=document.createElement('span');hint.textContent='재생이 차단되면 오른쪽 버튼을 눌러 주세요.';
+  const link=document.createElement('a');link.href='https://www.youtube.com/watch?v='+id;
+  link.target='_blank';link.rel='noopener noreferrer';link.textContent='▶ 유튜브에서 바로 재생';
+  foot.append(hint,link);wrap.append(frame,foot);area.append(wrap);
+  return true;
+ }catch(_){return false}
+}
+async function asFileURL(url,name,type){
  const ext=extOf(name),area=$('viewerArea');
+ if(type==='shared'&&['html','htm'].includes(ext)&&await showYouTubeWrapper(url,name))return;
  if(['html','htm','pdf','txt'].includes(ext)){
   const frame=document.createElement('iframe');frame.title=name;frame.src=url;
   if(['html','htm'].includes(ext)&&type!=='builtin')frame.setAttribute('sandbox','allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock');
@@ -128,7 +173,7 @@ async function openItem(item,type){
  if(type==='local'){
   try{const row=await getPersonal(item.id);if(!row){alert('보관된 자료를 찾지 못했어요.');return}const e=extOf(row.name);const blob=['html','htm'].includes(e)?new Blob([row.blob],{type:'text/html'}):row.blob;url=URL.createObjectURL(blob);viewURL=url}catch(_){alert('이 컴퓨터에 저장된 파일을 읽지 못했어요.');return}
  }else{url=type==='builtin'?new URL(item.path,location.href).href:item.url}
- openViewer(name);asFileURL(url,type==='builtin'?item.path:name,type);
+ openViewer(name);await asFileURL(url,type==='builtin'?item.path:name,type);
 }
 async function saveShared(item,button){
  button.disabled=true;button.textContent='저장 중…';
