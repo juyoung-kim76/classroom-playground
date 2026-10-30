@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수와 양 맞추기 (드래그 앤 드롭)</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            background-color: #f3f9ff;
+            overflow: hidden;
+            user-select: none;
+            touch-action: none; 
+        }
+
+        /* 교사 대시보드 토글 버튼 (우측 상단 투명 영역) */
+        #teacher-secret-btn {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: transparent;
+            z-index: 9999;
+            cursor: pointer;
+        }
+
+        /* 교사 대시보드 화면 */
+        #dashboard {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 9000;
+            color: white;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dashboard-content {
+            background: #fff;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            font-size: 1.2rem;
+        }
+
+        th { background-color: #f8f9fa; }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background-color: #f44336;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* 화면 분할 */
+        #game-area {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #top-half {
+            height: 45vh;
+            background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
+            /* 구름 이미지 등 장식 모두 제거하여 깔끔하게 유지 */
+        }
+
+        #bottom-half {
+            height: 55vh;
+            background-color: #ffffff;
+            border-top: 6px dashed #7ec8e3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* 드래그할 수 카드 */
+        #number-card {
+            font-size: 5.5rem;
+            font-weight: 900;
+            color: #fff;
+            width: 130px;
+            height: 130px;
+            background: #ff6b6b;
+            border-radius: 25px;
+            display: flex; /* 자바스크립트에서 토글됨 */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 0 #c92a2a, 0 15px 25px rgba(0,0,0,0.2);
+            cursor: grab;
+            margin-bottom: 25px;
+            z-index: 100;
+            animation: bounce 2s infinite;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        #number-card:active {
+            cursor: grabbing;
+            animation: none;
+            box-shadow: 0 4px 0 #c92a2a, 0 5px 10px rgba(0,0,0,0.2);
+            transform: translateY(4px);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
+        }
+
+        /* 보기 영역 (사물 카드) */
+        #options-container {
+            display: flex; /* 자바스크립트에서 토글됨 */
+            width: 95%;
+            justify-content: space-around;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .option-card {
+            flex: 1;
+            background: #fff;
+            border: 4px solid #e0e0e0;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+
+        /* 5개씩 2줄 배열을 위한 그리드 */
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 55px);
+            grid-template-rows: repeat(2, 55px);
+            gap: 8px;
+            justify-content: center;
+            align-content: center;
+            padding: 10px;
+        }
+
+        /* 사물(이미지) 크기 제어 */
+        .shape-item {
+            width: 55px;
+            height: 55px;
+            pointer-events: none;
+            filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.15));
+        }
+
+        /* 피드백 애니메이션 */
+        #feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15rem;
+            display: none;
+            z-index: 1000;
+            pointer-events: none;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        /* 마무리 칭찬 화면 */
+        #completion-screen {
+            display: none; /* 활동 완료 시 flex로 전환 */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        #completion-screen h2 {
+            font-size: 4.5rem;
+            color: #ff6b6b;
+            margin-top: 0;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .number-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .number-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background-color: #ffe066;
+            border-radius: 15px;
+            font-size: 3rem;
+            font-weight: 900;
+            color: #333;
+            box-shadow: 0 8px 0 #f5c211;
+            /* 등장 애니메이션 */
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+        }
+
+        /* 1~10 순서대로 통통 튀며 나타나도록 딜레이 적용 */
+        .number-box:nth-child(1) { animation-delay: 0.1s; }
+        .number-box:nth-child(2) { animation-delay: 0.2s; }
+        .number-box:nth-child(3) { animation-delay: 0.3s; }
+        .number-box:nth-child(4) { animation-delay: 0.4s; }
+        .number-box:nth-child(5) { animation-delay: 0.5s; }
+        .number-box:nth-child(6) { animation-delay: 0.6s; }
+        .number-box:nth-child(7) { animation-delay: 0.7s; }
+        .number-box:nth-child(8) { animation-delay: 0.8s; }
+        .number-box:nth-child(9) { animation-delay: 0.9s; }
+        .number-box:nth-child(10) { animation-delay: 1.0s; }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="teacher-secret-btn" onclick="toggleDashboard()"></div>
+    <div id="feedback">⭕</div>
+
+    <div id="dashboard">
+        <div class="dashboard-content">
+            <h2>📊 학생 학습 통계 (교사 전용)</h2>
+            <p>※ 우측 상단 모서리를 터치하면 이 화면을 열고 닫을 수 있습니다.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>학생</th>
+                        <th>진행 상황 (10회 기준)</th>
+                        <th>오반응 횟수</th>
+                        <th>리셋 횟수</th>
+                        <th>상태 / 선택</th>
+                    </tr>
+                </thead>
+                <tbody id="student-list"></tbody>
+            </table>
+            <button class="btn close-btn" onclick="toggleDashboard()">닫기 (학생 화면으로 돌아가기)</button>
+        </div>
+    </div>
+
+    <div id="game-area">
+        <!-- 상단 배경 깔끔하게 비움 -->
+        <div id="top-half"></div>
+        
+        <div id="bottom-half">
+            <!-- 기본 학습 화면 -->
+            <div id="number-card">?</div>
+            <div id="options-container">
+                <div class="option-card" data-index="0"></div>
+                <div class="option-card" data-index="1"></div>
+                <div class="option-card" data-index="2"></div>
+            </div>
+
+            <!-- 학습 완료 칭찬 화면 (기본 숨김) -->
+            <div id="completion-screen">
+                <h2>참 잘했어요! 🎉</h2>
+                <div class="number-row">
+                    <div class="number-box">1</div>
+                    <div class="number-box">2</div>
+                    <div class="number-box">3</div>
+                    <div class="number-box">4</div>
+                    <div class="number-box">5</div>
+                    <div class="number-box">6</div>
+                    <div class="number-box">7</div>
+                    <div class="number-box">8</div>
+                    <div class="number-box">9</div>
+                    <div class="number-box">10</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 학생 데이터 초기화
+        let students = [];
+        for (let i = 1; i <= 6; i++) {
+            students.push({
+                id: i, correctCount: 0, currentErrors: 0, resetCount: 0, completed: false
+            });
+        }
+
+        let currentStudentIndex = 0;
+        let currentTargetNumber = 0;
+        let currentOptions = [];
+        let isWaiting = false;
+
+        // 예쁘고 디테일한 SVG 일러스트
+        const svgs = {
+            apple: `<svg class="shape-item" viewBox="0 0 100 100">
+                        <path d="M50 85 C20 85 15 50 25 30 C30 20 45 20 50 30 C55 20 70 20 75 30 C85 50 80 85 50 85" fill="#ff4b4b"/>
+                        <path d="M50 30 Q45 15 55 10" fill="none" stroke="#654321" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M55 10 C65 10 70 20 55 25 Z" fill="#4caf50"/>
+                        <circle cx="35" cy="40" r="5" fill="#ffffff" opacity="0.6"/>
+                        <circle cx="42" cy="33" r="2" fill="#ffffff" opacity="0.6"/>
+                    </svg>`,
+            strawberry: `<svg class="shape-item" viewBox="0 0 100 100">
+                            <path d="M20 40 C20 15 80 15 80 40 C80 80 50 95 50 95 C50 95 20 80 20 40" fill="#e53935"/>
+                            <path d="M25 35 Q50 50 75 35 Q60 15 50 25 Q40 15 25 35" fill="#43a047"/>
+                            <circle cx="35" cy="50" r="2.5" fill="#ffcdd2"/>
+                            <circle cx="65" cy="50" r="2.5" fill="#ffcdd2"/>
+                            <circle cx="50" cy="70" r="2.5" fill="#ffcdd2"/>
+                            <circle cx="45" cy="40" r="2.5" fill="#ffcdd2"/>
+                            <circle cx="55" cy="60" r="2.5" fill="#ffcdd2"/>
+                            <circle cx="35" cy="70" r="2.5" fill="#ffcdd2"/>
+                            <circle cx="65" cy="70" r="2.5" fill="#ffcdd2"/>
+                        </svg>`,
+            persimmon: `<svg class="shape-item" viewBox="0 0 100 100">
+                            <circle cx="50" cy="55" r="35" fill="#ff8c00"/>
+                            <path d="M30 35 Q50 45 70 35 Q60 25 50 30 Q40 25 30 35" fill="#2e7d32"/>
+                            <rect x="47" y="20" width="6" height="12" fill="#5d4037" rx="3"/>
+                            <circle cx="35" cy="45" r="4" fill="#ffffff" opacity="0.5"/>
+                        </svg>`,
+            chestnut: `<svg class="shape-item" viewBox="0 0 100 100">
+                           <path d="M50 15 C80 40 90 70 70 85 C50 100 30 100 10 85 C-10 70 20 40 50 15" fill="#795548"/>
+                           <path d="M25 75 C40 95 60 95 75 75 C60 70 40 70 25 75" fill="#d7ccc8"/>
+                           <circle cx="65" cy="45" r="4" fill="#ffffff" opacity="0.3"/>
+                       </svg>`,
+            blueberry: `<svg class="shape-item" viewBox="0 0 100 100">
+                            <circle cx="50" cy="55" r="33" fill="#3f51b5"/>
+                            <path d="M40 25 L35 15 L50 20 L65 15 L60 25 Z" fill="#1a237e"/>
+                            <circle cx="38" cy="45" r="4" fill="#ffffff" opacity="0.4"/>
+                        </svg>`
+        };
+        const shapeKeys = Object.keys(svgs);
+
+        function toggleDashboard() {
+            const dash = document.getElementById('dashboard');
+            if (dash.style.display === 'flex') {
+                dash.style.display = 'none';
+            } else {
+                renderDashboard();
+                dash.style.display = 'flex';
+            }
+        }
+
+        function renderDashboard() {
+            const tbody = document.getElementById('student-list');
+            tbody.innerHTML = '';
+            students.forEach((student, index) => {
+                const tr = document.createElement('tr');
+                let btnHtml = student.completed 
+                    ? `<button class="btn" style="background-color:gray;" disabled>완료</button>`
+                    : `<button class="btn" onclick="selectStudent(${index})">${index === currentStudentIndex ? '현재 학습중' : '시작하기'}</button>`;
+
+                tr.innerHTML = `
+                    <td>${student.id}번 학생</td>
+                    <td>${student.correctCount} / 10</td>
+                    <td style="color:red; font-weight:bold;">${student.currentErrors} / 3</td>
+                    <td>${student.resetCount}회</td>
+                    <td>${btnHtml}</td>
+                `;
+                if (index === currentStudentIndex) tr.style.backgroundColor = '#e8f5e9';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function selectStudent(index) {
+            currentStudentIndex = index;
+            toggleDashboard();
+            startNewTrial();
+        }
+
+        function generateUniqueRandoms(count, max, exclude) {
+            let nums = new Set();
+            while (nums.size < count) {
+                let n = Math.floor(Math.random() * max) + 1;
+                if (n !== exclude) nums.add(n);
+            }
+            return Array.from(nums);
+        }
+
+        function showCompletionScreen() {
+            document.getElementById('number-card').style.display = 'none';
+            document.getElementById('options-container').style.display = 'none';
+            
+            // 완료 화면 표시 (애니메이션이 매번 처음부터 실행되도록 다시 렌더링 효과 부여)
+            const completionScreen = document.getElementById('completion-screen');
+            completionScreen.style.display = 'none'; 
+            setTimeout(() => {
+                completionScreen.style.display = 'flex';
+            }, 50);
+        }
+
+        function showGameScreen() {
+            document.getElementById('completion-screen').style.display = 'none';
+            document.getElementById('number-card').style.display = 'flex';
+            document.getElementById('options-container').style.display = 'flex';
+        }
+
+        function startNewTrial() {
+            const student = students[currentStudentIndex];
+            
+            if (student.completed) {
+                showCompletionScreen();
+                return;
+            }
+
+            // 게임 화면으로 복구
+            showGameScreen();
+            
+            isWaiting = false;
+            currentTargetNumber = Math.floor(Math.random() * 10) + 1;
+            let wrongNumbers = generateUniqueRandoms(2, 10, currentTargetNumber);
+            currentOptions = [currentTargetNumber, wrongNumbers[0], wrongNumbers[1]].sort(() => Math.random() - 0.5);
+
+            let currentShape = shapeKeys[Math.floor(Math.random() * shapeKeys.length)];
+
+            document.getElementById('number-card').innerText = currentTargetNumber;
+            
+            const cards = document.querySelectorAll('.option-card');
+            cards.forEach((card, idx) => {
+                card.style.borderColor = '#e0e0e0';
+                card.style.backgroundColor = '#fff';
+                
+                const numItems = currentOptions[idx];
+                let gridHtml = '<div class="shape-grid">';
+                for (let i = 0; i < numItems; i++) {
+                    gridHtml += svgs[currentShape];
+                }
+                gridHtml += '</div>';
+                card.innerHTML = gridHtml;
+            });
+            resetCardPosition();
+        }
+
+        function resetCardPosition() {
+            const card = document.getElementById('number-card');
+            card.style.position = 'static';
+            card.style.left = 'auto';
+            card.style.top = 'auto';
+            card.style.transform = 'none';
+        }
+
+        function checkAnswer(selectedIndex) {
+            if (isWaiting) return;
+            const student = students[currentStudentIndex];
+            if (student.completed) return;
+
+            isWaiting = true;
+            const selectedNumber = currentOptions[selectedIndex];
+            const feedback = document.getElementById('feedback');
+            const targetCard = document.querySelectorAll('.option-card')[selectedIndex];
+
+            if (selectedNumber === currentTargetNumber) {
+                targetCard.style.borderColor = '#4CAF50';
+                targetCard.style.backgroundColor = '#e8f5e9';
+                feedback.innerText = '⭕';
+                feedback.style.color = '#4CAF50';
+                feedback.style.display = 'block';
+                student.correctCount++;
+                student.currentErrors = 0;
+
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                    if (student.correctCount >= 10) {
+                        student.completed = true;
+                        showCompletionScreen();
+                    } else {
+                        startNewTrial();
+                    }
+                }, 1200);
+
+            } else {
+                targetCard.style.borderColor = '#F44336';
+                targetCard.style.backgroundColor = '#ffebee';
+                feedback.innerText = '❌';
+                feedback.style.color = '#F44336';
+                feedback.style.display = 'block';
+                student.currentErrors++;
+                resetCardPosition(); 
+
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                    if (student.currentErrors >= 3) {
+                        student.resetCount++;
+                        student.correctCount = 0;
+                        student.currentErrors = 0;
+                        alert(`${student.id}번 학생, 처음부터 다시 해볼까요? 파이팅!`);
+                    }
+                    isWaiting = false;
+                    if(student.currentErrors >= 3) {
+                        startNewTrial();
+                    } else {
+                        targetCard.style.borderColor = '#e0e0e0';
+                        targetCard.style.backgroundColor = '#fff';
+                    }
+                }, 1200);
+            }
+        }
+
+        // 드래그 앤 드롭 로직
+        const numberCard = document.getElementById('number-card');
+        let isDragging = false;
+        let shiftX, shiftY;
+
+        numberCard.addEventListener('pointerdown', function(e) {
+            if (students[currentStudentIndex].completed || isWaiting) return;
+            isDragging = true;
+            
+            const rect = numberCard.getBoundingClientRect();
+            shiftX = e.clientX - rect.left;
+            shiftY = e.clientY - rect.top;
+
+            numberCard.style.position = 'fixed';
+            numberCard.style.zIndex = 1000;
+            numberCard.style.margin = 0;
+            
+            moveAt(e.clientX, e.clientY);
+            numberCard.setPointerCapture(e.pointerId);
+        });
+
+        function moveAt(clientX, clientY) {
+            numberCard.style.left = clientX - shiftX + 'px';
+            numberCard.style.top = clientY - shiftY + 'px';
+        }
+
+        numberCard.addEventListener('pointermove', function(e) {
+            if (!isDragging) return;
+            moveAt(e.clientX, e.clientY);
+        });
+
+        numberCard.addEventListener('pointerup', function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            numberCard.releasePointerCapture(e.pointerId);
+            
+            const cardRect = numberCard.getBoundingClientRect();
+            const cardCenterX = cardRect.left + cardRect.width / 2;
+            const cardCenterY = cardRect.top + cardRect.height / 2;
+
+            const dropZones = document.querySelectorAll('.option-card');
+            let droppedIndex = -1;
+            
+            const margin = 30; 
+            
+            dropZones.forEach(zone => {
+                const rect = zone.getBoundingClientRect();
+                if (cardCenterX >= rect.left - margin && cardCenterX <= rect.right + margin &&
+                    cardCenterY >= rect.top - margin && cardCenterY <= rect.bottom + margin) {
+                    droppedIndex = parseInt(zone.getAttribute('data-index'));
+                }
+            });
+
+            if (droppedIndex !== -1) {
+                checkAnswer(droppedIndex);
+            } else {
+                resetCardPosition(); 
+            }
+        });
+
+        startNewTrial();
+    </script>
+</body>
+</html>
