@@ -1,57 +1,172 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover">
-<title>우리 반 학습 놀이터</title><meta name="theme-color" content="#285f8c"><meta name="description" content="우리 반 수학·즐생 전자칠판 활동">
-<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" type="image/png" href="./icons/app-192.png">
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>우리 반 학습 놀이터</title><meta name="theme-color" content="#20577f">
+<meta name="description" content="수학·즐생 게임과 교무실 공통자료, 교실 개인자료를 한곳에서 여는 전자칠판 앱">
+<link rel="icon" href="./icons/app-192.png" type="image/png"><link rel="manifest" href="./manifest.webmanifest">
 <style>
-:root{font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;color:#183650;background:#f5f8fc}*{box-sizing:border-box}body{margin:0;min-height:100vh}button{font:inherit;cursor:pointer}button:focus-visible{outline:4px solid #e8a950;outline-offset:2px}
-.shell{max-width:1190px;margin:auto;padding:26px 28px 32px}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:16px}.brand{display:flex;align-items:center;gap:17px}.logo{width:66px;height:66px;border-radius:18px;background:#285f8c;display:grid;place-items:center;box-shadow:0 5px 14px #275c8530}.logo svg{width:43px;height:43px}.brand h1{font-size:clamp(26px,3.3vw,42px);margin:0;letter-spacing:-1.1px;color:#174269}.brand p{margin:5px 0 0;color:#607789;font-size:15px}.status{display:flex;align-items:center;gap:9px;min-height:40px;padding:8px 13px;border-radius:30px;background:#e5f4e9;color:#2e7851;font-size:14px;font-weight:700}.status.offline{background:#fff2df;color:#99631c}.status i{width:9px;height:9px;border-radius:50%;background:currentColor}
-.tabs{display:flex;background:#e9eff4;padding:7px;border-radius:22px;gap:8px;margin:24px 0 22px}.tab{border:0;background:transparent;flex:1;padding:16px 12px;font-size:clamp(20px,2.1vw,27px);font-weight:800;border-radius:17px;color:#5a7083;transition:background .16s}.tab.active{background:#fff;color:#174c79;box-shadow:0 3px 11px #31557218}.tab .tabicon{font-size:27px;vertical-align:-2px;margin-right:8px}
-.sectiontitle{display:flex;justify-content:space-between;align-items:end;margin:0 0 18px;gap:10px}.sectiontitle h2{font-size:23px;margin:0;color:#244c70}.sectiontitle small{font-size:14px;color:#788b9a}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.activity{display:flex;align-items:center;text-align:left;border:2px solid #e0e8ee;background:#fff;min-height:135px;padding:18px;gap:16px;border-radius:22px;box-shadow:0 5px 13px #273f5520;transition:transform .13s,box-shadow .13s}.activity:hover{transform:translateY(-2px);box-shadow:0 8px 20px #273f5524}.art{width:74px;height:74px;flex:none;border-radius:19px;display:grid;place-items:center;background:#e8f0ff}.art svg{width:47px;height:47px}.activity[data-color="mint"] .art{background:#ddf4eb}.activity[data-color="yellow"] .art{background:#fff1cc}.activity[data-color="pink"] .art{background:#ffe5ec}.activity[data-color="purple"] .art{background:#ede3ff}.activity[data-color="blue"] .art{background:#e0efff}.name{font-size:19px;font-weight:850;color:#1a3c5b;line-height:1.3}.detail{font-size:13px;line-height:1.5;color:#758998;margin-top:7px}.new{display:inline-block;margin-top:6px;background:#dff3e6;color:#2b7757;font-size:11px;border-radius:20px;padding:3px 9px;font-weight:800}.empty{padding:50px 20px;text-align:center;background:white;border:2px dashed #c9d7e2;border-radius:20px;color:#607687;font-size:18px}
-.foot{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:28px;color:#6e8292;font-size:14px}.softbtn{background:#fff;border:2px solid #d2dee8;color:#244a67;padding:12px 19px;font-size:15px;font-weight:800;border-radius:15px;min-height:49px}.softbtn:hover{background:#f6fafd}.viewer{position:fixed;inset:0;background:#f5f8fc;z-index:10;display:flex;flex-direction:column}.viewbar{height:62px;background:#fff;border-bottom:1px solid #d7e2ea;flex:none;display:flex;gap:8px;justify-content:space-between;align-items:center;padding:7px 13px}.viewbar .title{font-size:18px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.leftcontrols,.rightcontrols{display:flex;gap:9px;align-items:center}.viewbtn{border:0;border-radius:11px;background:#e7f0f8;padding:11px 16px;font-weight:800;color:#285777;white-space:nowrap;min-height:44px}.viewbtn.primary{background:#235f90;color:#fff}.viewer iframe{border:0;flex:1;width:100%;background:white}.hidden{display:none!important}
-@media(max-width:930px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.activity{min-height:116px}.shell{padding:18px}}@media(max-width:580px){.cards{grid-template-columns:1fr}.brand h1{font-size:24px}.brand p{display:none}.logo{width:46px;height:46px;border-radius:13px}.logo svg{width:29px}.top{gap:6px}.status{font-size:12px;padding:8px}.tab{padding:14px 5px}.activity{min-height:90px}.art{height:60px;width:60px}.art svg{width:38px;height:38px}.foot{flex-wrap:wrap}.sectiontitle h2{font-size:18px}.viewbar .title{font-size:15px}.viewbtn{padding:10px;font-size:13px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+:root{font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;color:#203b50;background:#f3f7fa}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #eaa44c;outline-offset:2px}button:disabled{cursor:not-allowed;opacity:.5}
+.wrap{max-width:1190px;margin:0 auto;padding:23px 26px 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:14px}.logo{background:#28608c;width:65px;height:65px;border-radius:18px;display:grid;place-items:center}.logo svg{width:45px;height:45px}.brand h1{font-size:clamp(25px,3vw,38px);margin:0;color:#19446c;letter-spacing:-.7px}.brand p{margin:4px 0 0;color:#668094;font-size:14px}.status{font-weight:750;font-size:13px;color:#35744d;background:#e0f3e8;border-radius:24px;padding:10px 14px}.status.warning{color:#8d611e;background:#fff0d5}
+.tabs{display:flex;background:#e5edf3;padding:7px;gap:7px;border-radius:21px;margin:23px 0}.tab{flex:1;border:0;background:none;color:#607b8e;font-weight:850;padding:15px 8px;border-radius:15px;font-size:clamp(19px,2.1vw,25px)}.tab.active{color:#174c78;background:white;box-shadow:0 4px 14px #163b5e1a}
+.group{margin-bottom:28px}.group-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.group h2{margin:0;color:#264e6e;font-size:21px}.hint{color:#6a8192;font-size:13px}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.card{position:relative;background:white;border:2px solid #e2e9f0;border-radius:19px;min-height:125px;padding:15px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 10px #173b5910;overflow:hidden}.card .symbol{flex:none;width:65px;height:65px;border-radius:17px;display:grid;place-items:center;background:#e9f3ff;font-size:36px}.card.math .symbol{background:#e7f1ff}.card.joy .symbol{background:#e5f3df}.card.local .symbol{background:#fff0db}.card h3{margin:0;font-size:18px;color:#224561;line-height:1.35;overflow-wrap:anywhere}.card p{margin:6px 0 0;font-size:12px;color:#708598;line-height:1.4}.badge{display:inline-block;border-radius:20px;padding:3px 8px;margin-top:7px;font-size:11px;font-weight:750;background:#dcedf9;color:#23577d}.badge.local{background:#ffedcd;color:#8c5c18}.badge.shared{background:#dcf3e4;color:#25764b}.openbtn{position:absolute;inset:0;border:0;background:transparent;z-index:1}.card:hover{border-color:#9cbbd2;box-shadow:0 6px 20px #264b671d}.card-actions{display:flex;position:absolute;right:9px;bottom:8px;gap:3px;z-index:2}.tiny{font-size:12px;border:1px solid #cedfe9;border-radius:10px;background:#fff;padding:5px 9px;color:#315471;font-weight:750}.tiny:hover{background:#eaf2f8}.empty{border:2px dashed #cad7e1;border-radius:16px;padding:24px;color:#667e90;background:#fff;font-size:15px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:15px 0}.btn{background:#fff;border:2px solid #d1e0ea;border-radius:13px;padding:11px 16px;color:#255479;font-weight:800;min-height:46px}.btn.primary{background:#246493;border-color:#246493;color:#fff}.btn.green{background:#2d8057;border-color:#2d8057;color:#fff}.btn:hover{filter:brightness(.97)}.message{color:#607b8d;font-size:14px;margin:7px 0;line-height:1.6}.notice{background:#fff7e9;border:1px solid #f3dfbd;border-radius:15px;padding:14px 18px;color:#875d25;font-size:14px;line-height:1.6}
+.panel{background:white;border-radius:19px;border:2px solid #e3ebf1;padding:19px;margin:14px 0}.panel h2{font-size:22px;color:#244c70;margin:0 0 10px}.panel p{color:#61798d;line-height:1.65;margin:0 0 12px}.formrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.select{padding:13px;border-radius:12px;border:2px solid #d1e0ea;background:white;min-height:48px}.subtle{font-size:13px;color:#7b8e9e}.hide{display:none!important}
+.viewer{position:fixed;inset:0;z-index:20;background:white;display:flex;flex-direction:column}.viewerbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 16px;background:#f1f6f9;border-bottom:1px solid #d7e5ed;min-height:62px}.viewerbar strong{font-size:19px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.viewerbar .btn{padding:9px 13px}.viewerarea{flex:1;overflow:auto;display:flex;align-items:center;justify-content:center;background:#e7eef3;position:relative}.viewerarea iframe{width:100%;height:100%;border:0;background:#fff}.viewerarea img{max-width:100%;max-height:100%;object-fit:contain}.viewerarea video{max-width:100%;max-height:100%}.viewerarea audio{width:min(500px,90%)}.fallback{background:#fff;padding:25px;border-radius:18px;max-width:510px;text-align:center;line-height:1.8}.vieweraction{margin-top:14px}
+@media(max-width:880px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:17px}}@media(max-width:620px){.cards{grid-template-columns:1fr}.brand h1{font-size:22px}.brand p{display:none}.logo{width:45px;height:45px}.logo svg{width:32px}.status{font-size:11px}.tab{font-size:17px}.card{min-height:104px}.viewerbar strong{font-size:14px}.viewerbar .btn{padding:8px}}
 </style></head><body>
-<div id="home" class="shell"><header class="top"><div class="brand"><div class="logo" aria-hidden="true"><svg viewBox="0 0 52 52"><rect x="3" y="3" width="21" height="21" rx="5" fill="#FFCF70"/><circle cx="39" cy="14" r="11" fill="#9be2d5"/><path d="M15 29L3 50H27Z" fill="#f4a9a0"/><rect x="30" y="30" width="19" height="20" rx="5" fill="#d7cafa"/></svg></div><div><h1>우리 반 학습 놀이터</h1><p>전자칠판에서 만지고 배우는 즐거운 시간</p></div></div><div class="status" id="status"><i></i><span id="statusText">활동 준비 완료</span></div></header>
-<nav class="tabs" role="tablist" aria-label="교과 선택"><button class="tab active" id="tabMath" role="tab" aria-selected="true" type="button" data-tab="math"><span class="tabicon">▦</span>수학</button><button class="tab" id="tabJoy" role="tab" aria-selected="false" type="button" data-tab="joy"><span class="tabicon">✿</span>즐생</button></nav>
-<div class="sectiontitle"><h2 id="sectionName">수학 활동</h2><small id="sectionCount"></small></div><main id="cards" class="cards" aria-live="polite"></main>
-<footer class="foot"><span id="footNote">처음에는 수학과 즐생 두 교과로 나누어 사용해요.</span><button id="refresh" class="softbtn" type="button">↻ 새 활동 확인</button></footer></div>
-<section id="viewer" class="viewer hidden" aria-label="전자칠판 활동"><div class="viewbar"><div class="leftcontrols"><button type="button" class="viewbtn primary" id="back">← 활동 목록</button><span class="title" id="playingName"></span></div><div class="rightcontrols"><button type="button" class="viewbtn" id="reset">↻ 다시 시작</button><button type="button" class="viewbtn" id="full">⛶ 전체 화면</button></div></div><iframe id="activityFrame" title="학습 활동" allow="fullscreen"></iframe></section>
+<div id="home" class="wrap">
+<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="3" width="21" height="21" rx="5" fill="#FFCF70"/><circle cx="39" cy="14" r="11" fill="#9be2d5"/><path d="M15 29L3 50H27Z" fill="#f4a9a0"/><rect x="30" y="30" width="19" height="20" rx="5" fill="#d7cafa"/></svg></div><div><h1>우리 반 학습 놀이터</h1><p>우리 교실의 모든 수업자료를 한곳에 · 자료실 업데이트 2.1</p></div></div><div><div style="text-align:right;font-size:12px;color:#698094;font-weight:700;margin-bottom:6px">자료실 2.1 · 10월 30일 수정판</div><div class="status" id="status" role="status">활동 준비 중</div></div></header>
+<nav class="tabs" role="tablist" aria-label="교과 및 자료실"><button class="tab active" data-tab="math" role="tab" aria-selected="true">🔢 수학</button><button class="tab" data-tab="joy" role="tab" aria-selected="false">🌳 즐생</button><button class="tab" data-tab="my" role="tab" aria-selected="false">📁 내 자료</button></nav>
+<section id="subjectPage">
+  <div class="toolbar"><div><strong id="subjectTitle" style="font-size:22px">수학 활동</strong><div class="message">게임을 누르면 전자칠판에서 크게 열립니다.</div></div><button class="btn" type="button" id="syncBtn">↻ 공통 자료 새로고침</button></div>
+  <section class="group"><div class="group-head"><h2>🎲 기존 학습 게임</h2><span class="hint" id="baseCount"></span></div><div id="baseCards" class="cards"></div></section>
+  <section class="group"><div class="group-head"><h2>☁️ 교무실 공통 자료</h2><span class="hint" id="sharedCount"></span></div><div id="sharedCards" class="cards"></div></section>
+  <section class="group"><div class="group-head"><h2>📌 이 컴퓨터의 자료</h2><button class="btn" type="button" id="quickAdd">＋ 이 컴퓨터에 파일 추가</button></div><div id="localCards" class="cards"></div></section>
+</section>
+<section id="myPage" class="hide">
+  <div class="panel"><h2>📁 이 컴퓨터에 자료 넣기</h2><p>사진, PDF, HTML 게임, 동영상 등을 선택하면 <b>이 컴퓨터에만</b> 보관됩니다. 다른 교실에는 전달되지 않아요.</p>
+    <div class="formrow"><label for="localSubject"><b>교과 선택</b></label><select id="localSubject" class="select"><option value="math">🔢 수학</option><option value="joy">🌳 즐생</option></select><button type="button" id="chooseFiles" class="btn primary">＋ 내 파일 추가</button><input type="file" id="fileInput" class="hide" multiple accept=".html,.htm,.pdf,.png,.jpg,.jpeg,.webp,.gif,.svg,.mp4,.webm,.mp3,.wav,.ogg,.txt,.ppt,.pptx,.doc,.docx,.xls,.xlsx"/></div>
+    <div id="localMessage" class="message" role="status"></div>
+  </div>
+  <div class="panel"><h2>☁️ 모든 교실에 공통 자료 넣기</h2><p>공통 자료는 인터넷 보관함에 올립니다. 아래 교과를 골라 버튼을 누르면 <b>GitHub 업로드 폴더</b>가 열려요.</p>
+    <div class="formrow"><label for="sharedSubject"><b>교과 선택</b></label><select id="sharedSubject" class="select"><option value="math">🔢 수학</option><option value="joy">🌳 즐생</option></select><button class="btn green" id="goUpload" type="button">☁️ 공통 자료 올리기</button></div>
+    <div class="message">GitHub에서 로그인 → <b>Add file → Upload files</b> → 파일 선택 → <b>Commit changes</b>를 누르세요. 등록이 완료되면 교실 앱에서 <b>공통 자료 새로고침</b>을 누르면 됩니다.</div>
+  </div>
+  <div class="notice"><b>꼭 기억하세요!</b> 공통 자료는 인터넷에 공개됩니다. 학생 이름·사진·학습기록 등 개인정보는 올리지 마세요. 이 컴퓨터에 추가한 자료도 브라우저의 저장 데이터를 지우면 사라질 수 있으니 원본 파일을 보관하세요.</div>
+  <section class="group" style="margin-top:20px"><div class="group-head"><h2>📌 내가 추가한 파일</h2><span class="hint" id="myCount"></span></div><div id="myCards" class="cards"></div></section>
+</section>
+</div>
+<section id="viewer" class="viewer hide" aria-label="수업자료 보기"><div class="viewerbar"><button id="back" type="button" class="btn primary">← 목록으로</button><strong id="viewTitle">자료 제목</strong><div class="formrow"><button id="fullBtn" type="button" class="btn">⛶ 전체 화면</button></div></div><div id="viewerArea" class="viewerarea"></div></section>
 <script>
 'use strict';
-const LOCAL_ACTIVITIES=[{"id": "compare", "title": "큰 수 고르기", "detail": "두 수의 크기 비교 · 터치", "subject": "math", "icon": "numbers", "path": "activities/compare.html", "tag": "새 게임"}, {"id": "daynight", "title": "낮과 밤", "detail": "실사 그림 분류하기", "subject": "math", "icon": "sun", "path": "activities/daynight_photo.html"}, {"id": "tangram-new", "title": "탱그램 · 새로운 모양", "detail": "조각을 직접 돌려 맞추기", "subject": "math", "icon": "puzzle", "path": "activities/tangram_new.html"}, {"id": "tangram", "title": "탱그램 · 기본", "detail": "기초 모양 구성하기", "subject": "math", "icon": "puzzle", "path": "activities/tangram_original.html"}, {"id": "half", "title": "반쪽 그림 찾기", "detail": "그림 완성하기", "subject": "math", "icon": "butterfly", "path": "activities/half_picture.html"}, {"id": "hourglass", "title": "모래시계", "detail": "시간의 흐름 · 초 소리", "subject": "math", "icon": "hourglass", "path": "activities/hourglass.html"}, {"id": "big-sheet", "title": "큰 수 찾기 활동지", "detail": "무작위 문제 · 인쇄", "subject": "math", "icon": "print", "path": "activities/big_number_sheet.html"}, {"id": "order-sheet", "title": "수의 순서 활동지", "detail": "순서 문제 만들기", "subject": "math", "icon": "order", "path": "activities/number_order_sheet.html"}, {"id": "daynight-alt", "title": "낮과 밤 · 다른 그림", "detail": "예전 그림 버전", "subject": "math", "icon": "moon", "path": "activities/daynight_illustrated.html"}, {"id": "leaf-boat", "title": "나뭇잎 배 놀이", "detail": "잎을 물에 띄워요", "subject": "joy", "icon": "leaf", "path": "activities/leaf_boat.html", "tag": "새 게임"}, {"id": "summer-forest", "title": "교실 속 여름 숲", "detail": "자연물로 숲 꾸미기", "subject": "joy", "icon": "tree", "path": "activities/summer_forest.html", "tag": "새 게임"}];
+// 우리 반 학습 놀이터 2026-10-30: 공통 자료 + 이 컴퓨터의 자료
+// GitHub 저장소는 공개 수업자료 전용입니다. 인증정보/비밀번호를 코드에 저장하지 않습니다.
+const SETTINGS={owner:'juyoung-kim76', repo:'classroom-playground', branch:'main', cache:'classroom-shared-v1'};
+const BUILTINS=[{"id": "compare", "title": "큰 수 고르기", "detail": "두 수의 크기 비교 · 터치", "subject": "math", "icon": "numbers", "path": "activities/compare.html", "tag": "새 게임"}, {"id": "daynight", "title": "낮과 밤", "detail": "실사 그림 분류하기", "subject": "math", "icon": "sun", "path": "activities/daynight_photo.html"}, {"id": "tangram-new", "title": "탱그램 · 새로운 모양", "detail": "조각을 직접 돌려 맞추기", "subject": "math", "icon": "puzzle", "path": "activities/tangram_new.html"}, {"id": "tangram", "title": "탱그램 · 기본", "detail": "기초 모양 구성하기", "subject": "math", "icon": "puzzle", "path": "activities/tangram_original.html"}, {"id": "half", "title": "반쪽 그림 찾기", "detail": "그림 완성하기", "subject": "math", "icon": "butterfly", "path": "activities/half_picture.html"}, {"id": "hourglass", "title": "모래시계", "detail": "시간의 흐름 · 초 소리", "subject": "math", "icon": "hourglass", "path": "activities/hourglass.html"}, {"id": "big-sheet", "title": "큰 수 찾기 활동지", "detail": "무작위 문제 · 인쇄", "subject": "math", "icon": "print", "path": "activities/big_number_sheet.html"}, {"id": "order-sheet", "title": "수의 순서 활동지", "detail": "순서 문제 만들기", "subject": "math", "icon": "order", "path": "activities/number_order_sheet.html"}, {"id": "daynight-alt", "title": "낮과 밤 · 다른 그림", "detail": "예전 그림 버전", "subject": "math", "icon": "moon", "path": "activities/daynight_illustrated.html"}, {"id": "leaf-boat", "title": "나뭇잎 배 놀이", "detail": "잎을 물에 띄워요", "subject": "joy", "icon": "leaf", "path": "activities/leaf_boat.html", "tag": "새 게임"}, {"id": "summer-forest", "title": "교실 속 여름 숲", "detail": "자연물로 숲 꾸미기", "subject": "joy", "icon": "tree", "path": "activities/summer_forest.html", "tag": "새 게임"}];
 const $=id=>document.getElementById(id);
-let all=LOCAL_ACTIVITIES,tab='math',openId=null;
-const palette=['yellow','blue','purple','mint','pink'];
-const ICONS={
- numbers:'<text x="11" y="52" font-size="49" font-weight="900" fill="#33689c">1</text><text x="43" y="52" font-size="49" font-weight="900" fill="#ef9b56">5</text>',
- sun:'<circle cx="32" cy="32" r="19" fill="#ffd56c"/><path d="M32 4v7M32 53v7M4 32h7M53 32h7M12 12l5 5M47 47l5 5M52 12l-5 5M12 52l5-5" stroke="#e9a73f" stroke-width="4" stroke-linecap="round"/>',
- moon:'<path d="M39 10A24 24 0 1 0 54 49 25 25 0 0 1 39 10Z" fill="#8f99d8"/><circle cx="46" cy="16" r="3" fill="#f1c86b"/>',
- puzzle:'<path d="M6 8h24v21H6z" fill="#83cbbe"/><path d="M35 8L60 29H35Z" fill="#ffce7a"/><path d="M8 34L31 59H8Z" fill="#f6a4a2"/><rect x="34" y="34" width="24" height="24" rx="4" fill="#a8a1df"/>',
- butterfly:'<path d="M30 34C5-4-3 28 19 42 3 60 25 66 31 43" fill="#fbabbb"/><path d="M34 34C58-4 68 30 44 42 62 58 42 65 33 43" fill="#9fcbf2"/><path d="M32 29v24" stroke="#5c5b65" stroke-width="5" stroke-linecap="round"/>',
- hourglass:'<path d="M15 5h34v8L36 31l13 19v9H15v-9l13-19-13-18Z" fill="#fff" stroke="#6293bd" stroke-width="5"/><path d="M20 52l12-13 12 13Z" fill="#efc66d"/><path d="M20 14h24l-12 14Z" fill="#efc66d"/>',
- print:'<rect x="16" y="3" width="32" height="25" rx="3" fill="#c7e5f4"/><rect x="8" y="22" width="48" height="26" rx="6" fill="#7ea8ce"/><rect x="16" y="38" width="32" height="22" fill="#fff"/><path d="M22 46h20M22 53h17" stroke="#7ea8ce" stroke-width="3"/>',
- order:'<rect x="3" y="13" width="18" height="34" rx="5" fill="#f4b96c"/><rect x="24" y="13" width="18" height="34" rx="5" fill="#9bdac8"/><rect x="45" y="13" width="16" height="34" rx="5" fill="#a0bee5"/><g fill="#fff" font-size="22" font-weight="800" text-anchor="middle"><text x="12" y="36">1</text><text x="33" y="36">2</text><text x="53" y="36">3</text></g>',
- leaf:'<path d="M12 41Q13 5 55 9Q57 47 17 52" fill="#79bd7e" stroke="#57945e" stroke-width="3"/><path d="M9 58L48 20" stroke="#518a52" stroke-width="4"/>',
- tree:'<path d="M27 32h10v27H27Z" fill="#a57d56"/><circle cx="19" cy="29" r="15" fill="#99d39a"/><circle cx="40" cy="28" r="18" fill="#6cb17c"/><circle cx="30" cy="16" r="18" fill="#82c48e"/>'
-};
-function svgFor(t){return `<svg viewBox="0 0 64 64" aria-hidden="true">${ICONS[t]||ICONS.puzzle}</svg>`}
-function setTab(t){tab=t;for(const el of document.querySelectorAll('.tab')){const active=el.dataset.tab===t;el.classList.toggle('active',active);el.setAttribute('aria-selected',active?'true':'false')};$('sectionName').textContent=t==='math'?'수학 활동':'즐생 활동';render()}
-function render(){const found=all.filter(x=>x.subject===tab);$('sectionCount').textContent=`${found.length}개 활동`;$('cards').replaceChildren();if(!found.length){$('cards').innerHTML='<div class="empty">이 교과의 활동은 곧 추가할 수 있어요.</div>';return}for(const [i,x] of found.entries()){const b=document.createElement('button');b.type='button';b.className='activity';b.dataset.color=palette[i%palette.length];b.innerHTML=`<span class="art">${svgFor(x.icon)}</span><span class="copy"><span class="name"></span><div class="detail"></div>${x.tag?'<span class="new">'+x.tag+'</span>':''}</span>`;b.querySelector('.name').textContent=x.title;b.querySelector('.detail').textContent=x.detail;b.addEventListener('click',()=>openActivity(x.id));$('cards').append(b)}}
-function openActivity(id){const x=all.find(a=>a.id===id);if(!x)return;openId=id;$('playingName').textContent=x.title;$('home').classList.add('hidden');$('viewer').classList.remove('hidden');$('activityFrame').src=x.path;history.replaceState(null,'','#'+encodeURIComponent(id))}
-function closeActivity(){openId=null;$('activityFrame').src='about:blank';$('viewer').classList.add('hidden');$('home').classList.remove('hidden');history.replaceState(null,'',location.pathname+location.search);if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
-function getStatus(s,offline=false){$('statusText').textContent=s;$('status').classList.toggle('offline',offline)}
-async function refreshActivities(showMessage=false){
- // file:// 동작 시에는 내장 목록으로 열립니다. 웹에 게시하면 새 자료 목록을 받아옵니다.
- if(location.protocol==='file:'){getStatus('교실용 · 저장된 활동',true);if(showMessage)alert('지금은 컴퓨터에서 실행 중이에요. 교실 자동 연동은 앱을 온라인에 등록하면 시작됩니다.');return}
- if(!navigator.onLine){getStatus('오프라인 · 저장된 활동',true);return}
- try{const r=await fetch('activities.json?check='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const info=await r.json();if(!Array.isArray(info.activities))throw Error('invalid data');all=info.activities.filter(x=>x.id&&x.title&&['math','joy'].includes(x.subject)&&x.path&&/^activities\/[a-zA-Z0-9_-]+\.html$/.test(x.path));render();getStatus('최신 활동 확인 완료');if(showMessage)alert('활동 목록을 새로 확인했어요!')}catch(e){getStatus('저장된 활동 사용 중',true);if(showMessage)alert('새 활동을 받을 수 없어 기존 활동을 사용합니다.')}
+const subjectName=s=>s==='math'?'수학':'즐생';
+const icons={compare:'🔢',daynight:'🌞','tangram-new':'🧩',tangram:'🧩',half:'🦋',hourglass:'⏳','big-sheet':'🖨️','order-sheet':'🔢','daynight-alt':'🌙','leaf-boat':'🍃','summer-forest':'🌳'};
+const allowedExt=new Set(['html','htm','pdf','png','jpg','jpeg','webp','gif','svg','mp4','webm','mp3','wav','ogg','txt','ppt','pptx','doc','docx','xls','xlsx']);
+const extOf=name=>name.split('.').pop().toLowerCase();
+const emojiFor = name => ({pdf:'📄',html:'🎮',htm:'🎮',png:'🖼️',jpg:'🖼️',jpeg:'🖼️',webp:'🖼️',gif:'🖼️',svg:'🖼️',mp4:'🎬',webm:'🎬',mp3:'🎵',wav:'🎵',ogg:'🎵',ppt:'📊',pptx:'📊',doc:'📝',docx:'📝',xls:'📊',xlsx:'📊',txt:'📃'})[extOf(name)]||'📁';
+const displayName=n=>n.replace(/\.[^.]+$/,'').replaceAll('_',' ');
+let tab='math', base=BUILTINS, shared=[], personal=[], viewURL=null, syncBusy=false;
+function status(text,warning=false){$('status').textContent=text;$('status').classList.toggle('warning',warning)}
+function setTab(next){tab=next;document.querySelectorAll('.tab').forEach(b=>{const selected=b.dataset.tab===tab;b.classList.toggle('active',selected);b.setAttribute('aria-selected',String(selected))});$('subjectPage').classList.toggle('hide',tab==='my');$('myPage').classList.toggle('hide',tab!=='my');if(tab!=='my'){$('subjectTitle').textContent=subjectName(tab)+' 활동';$('localSubject').value=tab;$('sharedSubject').value=tab;}render()}
+function card(item,type){
+ const e=document.createElement('article');e.className=`card ${item.subject||'math'} ${type==='local'?'local':''}`;
+ const symbol=document.createElement('div');symbol.className='symbol';symbol.textContent=type==='builtin'?(icons[item.id]||'🎲'):emojiFor(item.name);
+ const txt=document.createElement('div');txt.style.minWidth='0';
+ const head=document.createElement('h3');head.textContent=type==='builtin'?item.title:displayName(item.name);
+ const desc=document.createElement('p');desc.textContent=type==='builtin'?item.detail:(type==='shared'?'모든 교실에서 사용':'이 컴퓨터에 저장됨');
+ const badge=document.createElement('span');badge.className='badge'+(type==='local'?' local':type==='shared'?' shared':'');badge.textContent=type==='builtin'?'기존 활동':type==='shared'?'☁️ 공통 자료':'📌 개인 자료';
+ txt.append(head,desc,badge);e.append(symbol,txt);
+ const open=document.createElement('button');open.type='button';open.className='openbtn';open.setAttribute('aria-label',(type==='builtin'?item.title:displayName(item.name))+' 열기');open.addEventListener('click',()=>openItem(item,type));e.append(open);
+ if(type!=='builtin'){
+  const actions=document.createElement('div');actions.className='card-actions';
+  if(type==='local'){
+   const del=document.createElement('button');del.type='button';del.className='tiny';del.textContent='삭제';del.addEventListener('click',()=>deletePersonal(item));actions.append(del);
+  }else{
+   const save=document.createElement('button');save.type='button';save.className='tiny';save.textContent='↓ 오프라인 저장';save.title='이 자료를 이 컴퓨터에 저장';save.addEventListener('click',()=>saveShared(item,save));actions.append(save);
+  }
+  e.append(actions);
+ }
+ return e;
 }
-document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
-$('back').addEventListener('click',closeActivity);
-$('reset').addEventListener('click',()=>{if(openId){const x=all.find(a=>a.id===openId);if(x)$('activityFrame').src=x.path}});
-$('full').addEventListener('click',()=>{if(document.fullscreenElement){document.exitFullscreen().catch(()=>{})}else{(document.getElementById('viewer').requestFullscreen?.()||Promise.resolve()).catch(()=>{})}});
-$('refresh').addEventListener('click',()=>refreshActivities(true));
-window.addEventListener('online',()=>refreshActivities());window.addEventListener('offline',()=>getStatus('오프라인 · 저장된 활동',true));
-window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.fullscreenElement&&openId)closeActivity()});
-setTab('math');refreshActivities();
+function fillCards(id,items,type,emptyMessage){let root=$(id);root.replaceChildren();if(!items.length){const t=document.createElement('div');t.className='empty';t.textContent=emptyMessage;root.append(t);return}items.forEach(item=>root.append(card(item,type)))}
+function render(){
+ if(tab==='my'){$('myCount').textContent=personal.length+'개 파일';fillCards('myCards',personal,'local','이 컴퓨터에 넣은 파일이 아직 없어요. 위의 「내 파일 추가」를 눌러주세요.');return}
+ const fixed=base.filter(x=>x.subject===tab),common=shared.filter(x=>x.subject===tab),mine=personal.filter(x=>x.subject===tab);
+ $('baseCount').textContent=fixed.length+'개';$('sharedCount').textContent=common.length+'개';
+ fillCards('baseCards',fixed,'builtin','기존 활동을 불러오지 못했어요.');
+ fillCards('sharedCards',common,'shared','교무실에서 등록된 공통 자료가 아직 없어요. 「내 자료」 탭에서 등록할 수 있어요.');
+ fillCards('localCards',mine,'local','이 교과에 저장된 개인 자료가 없어요. 「이 컴퓨터에 파일 추가」를 눌러주세요.');
+}
+function repoApi(subject){return `https://api.github.com/repos/${SETTINGS.owner}/${SETTINGS.repo}/contents/shared/${subject}?ref=${SETTINGS.branch}`}
+function sharedUrl(subject,name){return new URL(`./shared/${subject}/${encodeURIComponent(name)}`,location.href).href}
+function loadSharedSnapshot(){try {const s=JSON.parse(localStorage.getItem('playground-shared-snapshot')||'[]');return Array.isArray(s)?s.filter(x=>x&&x.name&&x.url&&['math','joy'].includes(x.subject)):[]}catch(_){return []}}
+async function syncShared(manual=false){
+ if(syncBusy)return;syncBusy=true;$('syncBtn').disabled=true;
+ if(location.protocol==='file:'){status('로컬 시험판 · 공통 자료 연동은 온라인 앱에서',true);if(manual)alert('공통 자료 연동은 GitHub Pages 주소로 접속해야 작동합니다.');syncBusy=false;$('syncBtn').disabled=false;return}
+ if(!navigator.onLine){status('인터넷 없음 · 저장된 자료 사용',true);if(manual)alert('인터넷에 연결되면 새 공통 자료를 확인할 수 있어요.');syncBusy=false;$('syncBtn').disabled=false;return}
+ status('공통 자료 확인 중…');
+ try {
+  const results=await Promise.all(['math','joy'].map(async s=>{
+   const res=await fetch(repoApi(s),{cache:'no-store',headers:{'Accept':'application/vnd.github+json'}});
+   if(!res.ok)throw new Error('공통 자료 목록을 불러올 수 없습니다 ('+res.status+')');
+   const list=await res.json();if(!Array.isArray(list))throw new Error('목록 형식 오류');
+   return list.filter(f=>f.type==='file'&&allowedExt.has(extOf(f.name))).map(f=>({id:`shared:${s}:${f.name}`,name:f.name,subject:s,url:sharedUrl(s,f.name),size:f.size}));
+  }));
+  shared=results.flat();try{localStorage.setItem('playground-shared-snapshot',JSON.stringify(shared))}catch(_){ }
+  status(`☁️ 공통 자료 최신 확인 (${shared.length}개)`);render();if(manual)alert('공통 자료를 새로 확인했어요!');
+ }catch(err){shared=loadSharedSnapshot();render();status('☁️ 저장된 공통 목록 사용',true);if(manual)alert('공통 목록을 확인하지 못했어요. 인터넷 연결이나 GitHub 게시 상태를 확인해주세요.\n'+err.message)}
+ finally{syncBusy=false;$('syncBtn').disabled=false}
+}
+function openViewer(title){$('home').classList.add('hide');$('viewer').classList.remove('hide');$('viewTitle').textContent=title;const v=$('viewerArea');v.replaceChildren();window.scrollTo(0,0)}
+function closeViewer(){if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});$('viewerArea').replaceChildren();$('viewer').classList.add('hide');$('home').classList.remove('hide');if(viewURL){URL.revokeObjectURL(viewURL);viewURL=null}}
+function asFileURL(url,name,type){
+ const ext=extOf(name),area=$('viewerArea');
+ if(['html','htm','pdf','txt'].includes(ext)){
+  const frame=document.createElement('iframe');frame.title=name;frame.src=url;
+  if(['html','htm'].includes(ext)&&type!=='builtin')frame.setAttribute('sandbox','allow-scripts allow-forms allow-modals allow-downloads allow-pointer-lock');
+  area.append(frame);
+ }else if(['png','jpg','jpeg','webp','gif','svg'].includes(ext)){
+  const im=document.createElement('img');im.src=url;im.alt=name;area.append(im);
+ }else if(['mp4','webm'].includes(ext)){
+  const v=document.createElement('video');v.controls=true;v.playsInline=true;v.src=url;area.append(v);
+ }else if(['mp3','wav','ogg'].includes(ext)){
+  const a=document.createElement('audio');a.controls=true;a.src=url;area.append(a);
+ }else{
+  const div=document.createElement('div');div.className='fallback';
+  const h=document.createElement('h2');h.textContent='📂 '+name;
+  const p=document.createElement('p');p.textContent='이 파일은 앱에서 바로 보여주기 어려워요. 파일을 저장한 후 파워포인트 또는 해당 프로그램에서 열어주세요.';
+  const link=document.createElement('a');link.className='btn primary vieweraction';link.style.display='inline-block';link.href=url;link.download=name;link.textContent='⬇️ 파일 저장하기';
+  div.append(h,p,link);area.append(div);
+ }
+}
+async function openItem(item,type){
+ const name=type==='builtin'?item.title:item.name;
+ let url;
+ if(type==='local'){
+  try{const row=await getPersonal(item.id);if(!row){alert('보관된 자료를 찾지 못했어요.');return}const e=extOf(row.name);const blob=['html','htm'].includes(e)?new Blob([row.blob],{type:'text/html'}):row.blob;url=URL.createObjectURL(blob);viewURL=url}catch(_){alert('이 컴퓨터에 저장된 파일을 읽지 못했어요.');return}
+ }else{url=type==='builtin'?new URL(item.path,location.href).href:item.url}
+ openViewer(name);asFileURL(url,type==='builtin'?item.path:name,type);
+}
+async function saveShared(item,button){
+ button.disabled=true;button.textContent='저장 중…';
+ try{
+  if(!('caches' in window))throw new Error('이 환경에서는 오프라인 저장을 지원하지 않아요.');
+  const response=await fetch(item.url,{cache:'no-store'});
+  if(!response.ok)throw new Error('파일이 아직 게시되지 않았어요. 잠시 후 다시 시도해주세요.');
+  const cache=await caches.open(SETTINGS.cache);await cache.put(item.url,response);
+  button.textContent='✓ 저장됨';alert('이 컴퓨터에 오프라인 자료가 저장됐어요.');
+ }catch(err){button.textContent='↓ 오프라인 저장';alert('저장하지 못했어요. '+err.message)}finally{button.disabled=false}
+}
+let dbPromise;
+function openDB(){if(!('indexedDB' in window))return Promise.reject(new Error('이 브라우저에서는 개인 자료 저장이 지원되지 않아요.'));if(dbPromise)return dbPromise;dbPromise=new Promise((resolve,reject)=>{const req=indexedDB.open('classroom-playground-personal-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('files',{keyPath:'id'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});return dbPromise}
+async function dbRequest(mode,fn){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('files',mode);const req=fn(tx.objectStore('files'));req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+const getPersonal=id=>dbRequest('readonly',store=>store.get(id));
+async function loadPersonal(){try{const res=await dbRequest('readonly',store=>store.getAll());personal=res.map(x=>({id:x.id,name:x.name,subject:x.subject,added:x.added})).sort((a,b)=>b.added-a.added);render()}catch(err){$('localMessage').textContent='이 컴퓨터의 자료실을 읽을 수 없어요: '+err.message}}
+async function importFiles(files){if(!files?.length)return;const sub=$('localSubject').value;let count=0;
+ for(const file of files){const ext=extOf(file.name);if(!allowedExt.has(ext)){alert('지원하지 않는 파일입니다: '+file.name);continue}
+  if(file.size>100*1024*1024){alert(file.name+'은(는) 용량이 100MB보다 커서 추가하지 않았어요.');continue}
+  try{const id=Date.now()+'-'+Math.random().toString(36).slice(2);await dbRequest('readwrite',s=>s.put({id,name:file.name,subject:sub,added:Date.now(),blob:file}));count++}catch(e){alert('저장에 실패했어요. 저장 공간이 부족하거나 브라우저 저장이 차단됐을 수 있어요.\n'+e.message);break}
+ }
+ await loadPersonal();$('localMessage').textContent=count?'✓ '+count+'개 파일을 이 컴퓨터에 저장했어요.':'추가된 파일이 없습니다.'; if(count)alert(count+'개 파일을 저장했어요. '+subjectName(sub)+' 탭에서 사용할 수 있어요.');
+}
+async function deletePersonal(item){if(!confirm('「'+item.name+'」 파일을 이 컴퓨터의 자료실에서 삭제할까요?\n원래 컴퓨터 폴더에 있는 원본 파일은 삭제되지 않습니다.'))return;try{await dbRequest('readwrite',s=>s.delete(item.id));await loadPersonal()}catch(e){alert('삭제하지 못했어요: '+e.message)}}
+function uploadPage(){const sub=$('sharedSubject').value;const url=`https://github.com/${SETTINGS.owner}/${SETTINGS.repo}/tree/${SETTINGS.branch}/shared/${sub}`;window.open(url,'_blank','noopener,noreferrer')}
+// 사용자 동작
+for(const b of document.querySelectorAll('.tab'))b.addEventListener('click',()=>setTab(b.dataset.tab));
+$('syncBtn').addEventListener('click',()=>syncShared(true));
+$('quickAdd').addEventListener('click',()=>{$('localSubject').value=tab;setTab('my');$('fileInput').click()});
+$('chooseFiles').addEventListener('click',()=>$('fileInput').click());
+$('fileInput').addEventListener('change',async e=>{await importFiles(e.target.files);e.target.value=''});
+$('goUpload').addEventListener('click',uploadPage);
+$('back').addEventListener('click',closeViewer);
+$('fullBtn').addEventListener('click',()=>{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else $('viewer').requestFullscreen?.().catch(()=>{})});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.fullscreenElement&&!$('viewer').classList.contains('hide'))closeViewer()});
+window.addEventListener('online',()=>syncShared(false));window.addEventListener('offline',()=>status('인터넷 없음 · 저장된 자료 사용',true));
+setTab('math');shared=loadSharedSnapshot();loadPersonal();
+fetch('./activities.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(data=>{if(Array.isArray(data?.activities))base=data.activities.filter(x=>['math','joy'].includes(x.subject)&&/^activities\/[A-Za-z0-9_-]+\.html$/.test(x.path));render()}).catch(()=>{});
+syncShared();
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script></body></html>
