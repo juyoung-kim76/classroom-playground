@@ -28,7 +28,7 @@
 .videoDirectCard .videoDirectHint{font-size:14px;color:#698099}
 </style></head><body>
 <div id="home" class="wrap">
-<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="3" width="21" height="21" rx="5" fill="#FFCF70"/><circle cx="39" cy="14" r="11" fill="#9be2d5"/><path d="M15 29L3 50H27Z" fill="#f4a9a0"/><rect x="30" y="30" width="19" height="20" rx="5" fill="#d7cafa"/></svg></div><div><h1>우리 반 학습 놀이터</h1><p>우리 교실의 모든 수업자료를 한곳에 · 자료실 업데이트 2.3</p></div></div><div><div style="text-align:right;font-size:12px;color:#698094;font-weight:700;margin-bottom:6px">자료실 2.3 · 영상 연결 수정</div><div class="status" id="status" role="status">활동 준비 중</div></div></header>
+<header class="top"><div class="brand"><div class="logo"><svg viewBox="0 0 52 52" aria-hidden="true"><rect x="3" y="3" width="21" height="21" rx="5" fill="#FFCF70"/><circle cx="39" cy="14" r="11" fill="#9be2d5"/><path d="M15 29L3 50H27Z" fill="#f4a9a0"/><rect x="30" y="30" width="19" height="20" rx="5" fill="#d7cafa"/></svg></div><div><h1>우리 반 학습 놀이터</h1><p>우리 교실의 모든 수업자료를 한곳에 · 자료실 업데이트 2.4</p></div></div><div><div style="text-align:right;font-size:12px;color:#698094;font-weight:700;margin-bottom:6px">자료실 2.4 · 한글 파일 이름 수정</div><div class="status" id="status" role="status">활동 준비 중</div></div></header>
 <nav class="tabs" role="tablist" aria-label="교과 및 자료실"><button class="tab active" data-tab="math" role="tab" aria-selected="true">🔢 수학</button><button class="tab" data-tab="joy" role="tab" aria-selected="false">🌳 즐생</button><button class="tab" data-tab="my" role="tab" aria-selected="false">📁 내 자료</button></nav>
 <section id="subjectPage">
   <div class="toolbar"><div><strong id="subjectTitle" style="font-size:22px">수학 활동</strong><div class="message">게임을 누르면 전자칠판에서 크게 열립니다.</div></div><button class="btn" type="button" id="syncBtn">↻ 공통 자료 새로고침</button></div>
@@ -62,13 +62,27 @@ const icons={compare:'🔢',daynight:'🌞','tangram-new':'🧩',tangram:'🧩',
 const allowedExt=new Set(['html','htm','pdf','png','jpg','jpeg','webp','gif','svg','mp4','webm','mp3','wav','ogg','txt','ppt','pptx','doc','docx','xls','xlsx']);
 const extOf=name=>name.split('.').pop().toLowerCase();
 const emojiFor = name => ({pdf:'📄',html:'🎮',htm:'🎮',png:'🖼️',jpg:'🖼️',jpeg:'🖼️',webp:'🖼️',gif:'🖼️',svg:'🖼️',mp4:'🎬',webm:'🎬',mp3:'🎵',wav:'🎵',ogg:'🎵',ppt:'📊',pptx:'📊',doc:'📝',docx:'📝',xls:'📊',xlsx:'📊',txt:'📃'})[extOf(name)]||'📁';
-const displayName=n=>n.replace(/\.[^.]+$/,'').replaceAll('_',' ');
+// 다운로드/업로드 과정에서 %EC%88%98... 형식으로 저장된 한글 파일 이름도 읽기 쉽게 표시합니다.
+// 원본 파일 이름은 건드리지 않으므로 실제 자료 경로와 연결은 그대로 유지됩니다.
+function readableFileName(value){
+ let name=String(value||'');
+ for(let i=0;i<3;i++){
+  if(!/%[0-9a-fA-F]{2}/.test(name))break;
+  try{
+   const next=decodeURIComponent(name);
+   if(next===name)break;
+   name=next;
+  }catch(_){break;}
+ }
+ return name.normalize('NFC');
+}
+const displayName=n=>readableFileName(n).replace(/\.[^.]+$/,'').replaceAll('_',' ');
 let tab='math', base=BUILTINS, shared=[], personal=[], viewURL=null, syncBusy=false;
 function status(text,warning=false){$('status').textContent=text;$('status').classList.toggle('warning',warning)}
 function setTab(next){tab=next;document.querySelectorAll('.tab').forEach(b=>{const selected=b.dataset.tab===tab;b.classList.toggle('active',selected);b.setAttribute('aria-selected',String(selected))});$('subjectPage').classList.toggle('hide',tab==='my');$('myPage').classList.toggle('hide',tab!=='my');if(tab!=='my'){$('subjectTitle').textContent=subjectName(tab)+' 활동';$('localSubject').value=tab;$('sharedSubject').value=tab;}render()}
 function card(item,type){
  const e=document.createElement('article');e.className=`card ${item.subject||'math'} ${type==='local'?'local':''}`;
- const symbol=document.createElement('div');symbol.className='symbol';symbol.textContent=type==='builtin'?(icons[item.id]||'🎲'):emojiFor(item.name);
+ const symbol=document.createElement('div');symbol.className='symbol';symbol.textContent=type==='builtin'?(icons[item.id]||'🎲'):(/유튜브|youtube/i.test(displayName(item.name))?'▶️':emojiFor(item.name));
  const txt=document.createElement('div');txt.style.minWidth='0';
  const head=document.createElement('h3');head.textContent=type==='builtin'?item.title:displayName(item.name);
  const desc=document.createElement('p');desc.textContent=type==='builtin'?item.detail:(type==='shared'?'모든 교실에서 사용':'이 컴퓨터에 저장됨');
@@ -108,7 +122,7 @@ async function syncShared(manual=false){
    const res=await fetch(repoApi(s),{cache:'no-store',headers:{'Accept':'application/vnd.github+json'}});
    if(!res.ok)throw new Error('공통 자료 목록을 불러올 수 없습니다 ('+res.status+')');
    const list=await res.json();if(!Array.isArray(list))throw new Error('목록 형식 오류');
-   return list.filter(f=>f.type==='file'&&allowedExt.has(extOf(f.name))).map(f=>({id:`shared:${s}:${f.name}`,name:f.name,subject:s,url:sharedUrl(s,f.name),size:f.size}));
+   return list.filter(f=>f.type==='file'&&allowedExt.has(extOf(f.name))&&!/^readme(?:\.[^.]+)?$/i.test(readableFileName(f.name))).map(f=>({id:`shared:${s}:${f.name}`,name:f.name,subject:s,url:sharedUrl(s,f.name),size:f.size}));
   }));
   shared=results.flat();try{localStorage.setItem('playground-shared-snapshot',JSON.stringify(shared))}catch(_){ }
   status(`☁️ 공통 자료 최신 확인 (${shared.length}개)`);render();if(manual)alert('공통 자료를 새로 확인했어요!');
@@ -136,7 +150,7 @@ function showYouTubeDirect(id,name){
  const area=$('viewerArea');
  const card=document.createElement('section');card.className='videoDirectCard';
  const glyph=document.createElement('div');glyph.className='videoDirectGlyph';glyph.textContent='▶';
- const heading=document.createElement('h2');heading.textContent=name.replace(/\.html?$/i,'').replaceAll('_',' ');
+ const heading=document.createElement('h2');heading.textContent=displayName(name);
  const summary=document.createElement('p');summary.textContent='영상은 유튜브에서 재생됩니다. 수업이 끝나면 이 창으로 돌아오세요.';
  const link=document.createElement('a');link.className='videoDirectButton';
  link.href='https://www.youtube.com/watch?v='+id;
@@ -148,7 +162,7 @@ function showYouTubeDirect(id,name){
 }
 async function showYouTubeWrapper(url,name){
  // 사용자가 올린 영상 연결 파일을 확실하게 인식하는 보완 처리
- const normalized=decodeURIComponent(name).normalize('NFC');
+ const normalized=readableFileName(name);
  if(/낮과[_ ]?밤[_ ]?노래|낮과밤노래|미과[_ ]?밤[_ ]?노래/i.test(normalized)){
    showYouTubeDirect('2BDSt5P0mhw',name);return true;
  }
@@ -192,7 +206,7 @@ async function openItem(item,type){
  if(type==='local'){
   try{const row=await getPersonal(item.id);if(!row){alert('보관된 자료를 찾지 못했어요.');return}const e=extOf(row.name);const blob=['html','htm'].includes(e)?new Blob([row.blob],{type:'text/html'}):row.blob;url=URL.createObjectURL(blob);viewURL=url}catch(_){alert('이 컴퓨터에 저장된 파일을 읽지 못했어요.');return}
  }else{url=type==='builtin'?new URL(item.path,location.href).href:item.url}
- openViewer(name);await asFileURL(url,type==='builtin'?item.path:name,type);
+ openViewer(type==='builtin'?name:displayName(name));await asFileURL(url,type==='builtin'?item.path:name,type);
 }
 async function saveShared(item,button){
  button.disabled=true;button.textContent='저장 중…';
