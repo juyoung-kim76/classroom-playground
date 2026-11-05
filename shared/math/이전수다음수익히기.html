@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다음 수 · 이전 수 랜덤 활동지</title>
+<style>
+:root{--ink:#27313a;--border:#b9c8d2;--accent:#e3f3ec;--weak:#f8fafb}
+*{box-sizing:border-box}body{margin:0;background:#edf2f5;font-family:Arial,'Malgun Gothic','맑은 고딕',sans-serif;color:var(--ink)}
+.toolbar{position:sticky;top:0;z-index:10;background:#fff;box-shadow:0 3px 18px #0001;padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}
+.toolbar label{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:700}
+select,button{font:inherit;border:1px solid #b9c7d0;border-radius:9px;padding:10px;background:#fff;color:#283642}
+button{cursor:pointer;font-weight:bold}button.primary{background:#206c61;color:white;border-color:#206c61}button:focus-visible,select:focus-visible{outline:3px solid #f1bf4f}
+.hint{width:100%;text-align:center;color:#61707b;font-size:12px}.sheet{width:210mm;height:297mm;background:#fff;margin:20px auto;padding:15mm 15mm 12mm;box-shadow:0 4px 25px #0002;display:flex;flex-direction:column}
+.sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.kicker{display:inline-block;background:var(--accent);padding:6px 12px;border-radius:9px;font-size:12px;font-weight:800}
+h1{font-size:27px;margin:12px 0 6px;letter-spacing:-1px}.name{font-size:14px;color:#61707b;margin-top:20px}
+.instruction{font-size:14px;margin:18px 0 10px}.rule{border-top:1px solid #d5dfe5;margin-bottom:12px}
+.number-line{display:flex;justify-content:center;margin:2px 0 14px;align-self:center}.number-line .cell{width:14mm;height:13mm;border-radius:0;margin-left:-1px}
+.problem-grid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:9mm 8mm;align-items:stretch}
+.problem-grid.guided{grid-template-columns:1fr;gap:2.4mm}
+.problem{border:1px solid #d7e0e6;border-radius:9px;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:#fff}
+.problem:nth-child(even){background:#fcfdff}.num{position:absolute;top:7px;left:9px;font-size:11px;color:#86949c;font-weight:bold}
+.cell{display:flex;align-items:center;justify-content:center;border:1.6px solid #93a4b0;border-radius:5px;width:16mm;height:16mm;font-size:27px;font-weight:bold;background:white}
+.cell.focus{background:var(--accent);border-color:#98bcae}.cell.answer{color:#176e61;background:#edf9f5}
+.arrow-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:30mm}
+.arrow-label{font-size:11px;color:#6f777c}.arr{font-size:30px;line-height:20px;color:#b06e72}
+.row{display:flex;align-items:center;justify-content:center;gap:4mm}
+.problem-grid.guided .problem{justify-content:space-around;padding:0 7mm}
+.strip{display:flex}.strip .cell{border-radius:0;margin-left:-1px;width:13mm;height:13mm;font-size:22px}
+.triple{display:flex;gap:4mm;align-items:center}.triple .cell{width:17mm;height:17mm}
+.triple .item{display:flex;flex-direction:column;align-items:center;gap:4px}
+.triple small{font-size:10px;color:#6d7b81}.guide-title{color:#76828a;font-size:11px;font-weight:700}
+.footer{display:flex;justify-content:space-between;border-top:1px solid #edf1f4;margin-top:10mm;padding-top:4mm;font-size:10px;color:#7e8d96}
+@page{size:A4;margin:0}
+@media print{html,body{width:210mm;height:auto;margin:0;padding:0;background:#fff!important}.toolbar{display:none!important}.sheet{margin:0;box-shadow:none;page-break-after:avoid;break-after:avoid;padding:15mm 15mm 12mm;width:210mm;height:297mm}.problem{print-color-adjust:exact;-webkit-print-color-adjust:exact}.cell.focus,.kicker{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+@media screen and (max-width:850px){.sheet{transform-origin:top center;zoom:.70;margin-top:12px;margin-bottom:12px}.toolbar{position:static}}
+@media screen and (max-width:600px){.sheet{zoom:.48}}
+</style></head>
+<body>
+<div class="toolbar" aria-label="활동지 설정">
+<label>공부할 내용 <select id="mode"><option value="next">다음 수</option><option value="prev">이전 수</option><option value="both">이전 수와 다음 수</option></select></label>
+<label>활동 단계 <select id="level"><option value="guided">1단계 · 수 배열</option><option value="arrow">2단계 · 빈칸</option></select></label>
+<label>문제 수 <select id="count"><option value="6">6개</option><option value="8">8개</option><option value="10">10개</option><option value="12">12개</option></select></label>
+<button class="primary" id="shuffle">↻ 새 문제 만들기</button><button id="print">인쇄하기</button><button id="answer">정답 보기</button>
+<div class="hint">인터넷 연결 없이 작동합니다. 새 문제 만들기를 누르면 숫자가 바뀝니다. 인쇄 시 정답은 자동으로 숨겨집니다.</div>
+</div>
+<main class="sheet" id="sheet">
+ <div class="sheet-head"><div><div class="kicker" id="kicker">1~10 수의 순서</div><h1 id="title">다음 수를 찾아요</h1></div><div class="name">이름 _____________</div></div>
+ <div class="instruction" id="instruction"></div><div class="rule"></div>
+ <div class="number-line" id="numberLine"></div><div class="problem-grid" id="problems"></div>
+ <div class="footer"><span>1~10까지 · 수의 순서</span><span>반복 연습 활동지</span></div>
+</main>
+<script>
+(() => {
+ 'use strict';
+ const $ = id => document.getElementById(id);
+ const mode=$('mode'),level=$('level'),count=$('count'),grid=$('problems'),numberLine=$('numberLine');
+ let questions=[],showAnswers=false;
+ function pickNumbers(){
+   const m=mode.value, guided=level.value==='guided';
+   const lo=m==='next'?(guided?3:1):m==='prev'?2:2;
+   const hi=m==='next'?9:m==='prev'?(guided?8:10):9;
+   const a=Array.from({length:hi-lo+1},(_,i)=>i+lo);
+   const total=Number(count.value),out=[];
+   while(out.length<total){
+     let part=a.slice();for(let i=part.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[part[i],part[j]]=[part[j],part[i]];}
+     if(out.length && part.length>1 && out[out.length-1]===part[0]){const idx=part.findIndex(v=>v!==out[out.length-1]);[part[0],part[idx]]=[part[idx],part[0]];}
+     out.push(...part);
+   }
+   questions=out.slice(0,total);
+ }
+ function box(v,kind=''){return `<span class="cell ${kind}" aria-label="${v===null?'빈칸':v}">${v===null?'':v}</span>`;}
+ function fill(v){return showAnswers?box(v,'answer'):box(null);}
+ function strip(n,m){
+   const nums=m==='next'?[n-2,n-1,n,n+1]:m==='prev'?[n-1,n,n+1,n+2]:[n-1,n,n+1];
+   return `<div class="strip">${nums.map((v,i)=>box((m==='next'&&i===3)||(m==='prev'&&i===0)||(m==='both'&&i!==1)?(showAnswers?v:null):v,v===n?'focus':'' )).join('')}</div>`;
+ }
+ function triple(n){
+   return `<div class="triple"><div class="item"><small>이전 수</small>${fill(n-1)}</div><div class="item"><small>&nbsp;</small>${box(n,'focus')}</div><div class="item"><small>다음 수</small>${fill(n+1)}</div></div>`;
+ }
+ function arrow(n,m){
+   if(m==='both')return triple(n);
+   const pre=m==='next'?box(n,'focus'):fill(n-1);
+   const post=m==='next'?fill(n+1):box(n,'focus');
+   const arrowMark=m==='next'?'→':'←';
+   return `<div class="row">${pre}<div class="arrow-wrap"><div class="arrow-label">${m==='next'?'다음 수':'이전 수'}</div><div class="arr">${arrowMark}</div></div>${post}</div>`;
+ }
+ function makeCard(n,i){
+    const m=mode.value, guided=level.value==='guided';
+    let inside;
+    if(guided && m!=='both')inside=`<div class="row">${strip(n,m)}</div>${arrow(n,m)}`;
+    else if(guided)inside=`${strip(n,m)}${triple(n)}`;
+    else inside=arrow(n,m);
+    return `<section class="problem"><span class="num">${String(i+1).padStart(2,'0')}</span>${inside}</section>`;
+ }
+ function render(){
+    const m=mode.value, guided=level.value==='guided';
+    const titles={next:'다음 수를 찾아요',prev:'이전 수를 찾아요',both:'이전 수와 다음 수'};
+    const verbs={next:'다음 수',prev:'이전 수',both:'이전 수와 다음 수'};
+    $('title').textContent=titles[m];
+    $('kicker').textContent=(guided?'1단계 · 수 배열 보기':'2단계 · 혼자 해 보기');
+    $('instruction').textContent=`숫자를 보고 ${verbs[m]}를 빈칸에 써 보세요.`;
+    document.documentElement.style.setProperty('--accent',m==='next'?'#def3e8':m==='prev'?'#e5edfb':'#f7e8d7');
+    numberLine.style.display=guided?'flex':'none';
+    numberLine.innerHTML=guided?Array.from({length:10},(_,i)=>box(i+1)).join(''):'';
+    grid.className='problem-grid'+(guided?' guided':'');
+    grid.style.gridTemplateRows=`repeat(${Math.ceil(questions.length/(guided?1:2))},minmax(0,1fr))`;
+    grid.style.gap=guided?'2.8mm':'4mm 7mm';
+    grid.innerHTML=questions.map(makeCard).join('');
+    // If the page has many guided questions, keep the boxes comfortably readable.
+    if(guided && questions.length>8){grid.querySelectorAll('.problem .cell').forEach(el=>{el.style.width='12mm';el.style.height='12mm';el.style.fontSize='19px';});}
+    $('answer').textContent=showAnswers?'정답 숨기기':'정답 보기';
+ }
+ function refresh(){showAnswers=false;pickNumbers();render()}
+ mode.addEventListener('change',refresh);level.addEventListener('change',()=>{if(level.value==='guided'&&Number(count.value)>8)count.value='8';refresh()});
+ count.addEventListener('change',()=>{if(level.value==='guided'&&Number(count.value)>8)count.value='8';refresh()});
+ $('shuffle').addEventListener('click',refresh);
+ $('answer').addEventListener('click',()=>{showAnswers=!showAnswers;render()});
+ $('print').addEventListener('click',()=>{if(showAnswers){showAnswers=false;render();}window.print()});
+ count.value='6'; refresh();
+})();
+</script>
+</body></html>
